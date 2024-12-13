@@ -24,6 +24,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<SocialPulseContext>();
+    dbContext.Database.EnsureCreated();
+}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -33,7 +39,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
-//app.MapDefaultControllerRoute();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
