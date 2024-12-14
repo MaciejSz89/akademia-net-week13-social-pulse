@@ -1,18 +1,47 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SocialPulse.Areas.Identity.Data;
+using SocialPulse.Core.Models.Settings;
 using SocialPulse.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("SocialPulseContextConnection") ?? throw new InvalidOperationException("Connection string 'SocialPulseContextConnection' not found.");
 
 builder.Services.AddDbContext<SocialPulseContext>(options => options.UseSqlServer(connectionString));
+var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
+bool isEmailConfigured = !string.IsNullOrWhiteSpace(emailSettings?.SmtpServer) &&
+                         emailSettings.SmtpPort > 0 &&
+                         !string.IsNullOrWhiteSpace(emailSettings?.FromEmail) &&
+                         !string.IsNullOrWhiteSpace(emailSettings?.FromPassword);
 
-builder.Services.AddDefaultIdentity<SocialPulseUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<SocialPulseUser>(options =>
+                                                    {
+                                                        options.SignIn.RequireConfirmedAccount = isEmailConfigured; // Require confirmation only if email is configured
+                                                        options.User.RequireUniqueEmail = true;        // Ensure unique email addresses
+                                                    })
                 .AddEntityFrameworkStores<SocialPulseContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+// Register the email sender if email settings are configured
+if (isEmailConfigured)
+{
+    builder.Services.AddTransient<IEmailSender>(provider =>
+        new SmtpEmailSender(
+            emailSettings!.SmtpServer,
+            emailSettings.SmtpPort,
+            emailSettings.FromEmail,
+            emailSettings.FromPassword
+        ));
+}
+else
+{
+    // No-op email sender if email settings are missing
+    builder.Services.AddTransient<IEmailSender, NoOpEmailSender>();
+}
 
 var app = builder.Build();
 
