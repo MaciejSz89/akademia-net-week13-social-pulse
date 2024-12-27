@@ -32,15 +32,15 @@
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary mb-3">Zaloguj</button>
                 </div>
                 <div>
-                    <p>
+ @*                    <p>
                         <a id="forgot-password" asp-page="./ForgotPassword">Zapomniałeś hasło?</a>
-                    </p>
+                    </p> *@
                     <p>
                         <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Zarejestruj nowego użytkownika</a>
                     </p>
-                    <p>
+@*                     <p>
                         <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Wyślij maila potwierdzającego</a>
-                    </p>
+                    </p> *@
                 </div>
             </form>
         </section>
