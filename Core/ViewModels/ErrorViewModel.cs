@@ -1,4 +1,4 @@
-namespace SocialPulse.Models
+namespace SocialPulse.Core.ViewModels
 {
     public class ErrorViewModel
     {

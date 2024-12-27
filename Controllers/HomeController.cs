@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using SocialPulse.Models;
+using SocialPulse.Core.ViewModels;
 using System.Diagnostics;
 
 namespace SocialPulse.Controllers
