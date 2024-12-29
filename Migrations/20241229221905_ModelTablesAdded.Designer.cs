@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialPulse.Persistence;
 
@@ -11,9 +12,11 @@ using SocialPulse.Persistence;
 namespace SocialPulse.Migrations
 {
     [DbContext(typeof(SocialPulseContext))]
-    partial class SocialPulseContextModelSnapshot : ModelSnapshot
+    [Migration("20241229221905_ModelTablesAdded")]
+    partial class ModelTablesAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,13 +301,11 @@ namespace SocialPulse.Migrations
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("SocialPulseUserId")
+                    b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SocialPulseUserId");
 
                     b.ToTable("SocialProfiles");
                 });
@@ -406,17 +407,6 @@ namespace SocialPulse.Migrations
                     b.Navigation("SocialNetwork");
 
                     b.Navigation("SocialProfile");
-                });
-
-            modelBuilder.Entity("SocialPulse.Core.Models.SocialProfile", b =>
-                {
-                    b.HasOne("SocialPulse.Areas.Identity.Data.SocialPulseUser", "SocialPulseUser")
-                        .WithMany()
-                        .HasForeignKey("SocialPulseUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SocialPulseUser");
                 });
 
             modelBuilder.Entity("SocialPulse.Core.Models.UserLinks", b =>

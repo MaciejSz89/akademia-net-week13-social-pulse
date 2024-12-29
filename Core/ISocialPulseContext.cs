@@ -1,6 +1,13 @@
-﻿namespace SocialPulse.Core
+﻿using Microsoft.EntityFrameworkCore;
+using SocialPulse.Core.Models;
+
+namespace SocialPulse.Core
 {
     public interface ISocialPulseContext
     {
+        DbSet<UserLink> UserLinks { get; set; }
+        DbSet<SocialLink> SocialLinks { get; set; }
+        DbSet<SocialNetwork> SocialNetworks { get; set; }
+        DbSet<SocialProfile> SocialProfiles { get; set; }
     }
 }
