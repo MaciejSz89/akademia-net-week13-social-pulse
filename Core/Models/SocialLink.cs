@@ -3,15 +3,12 @@
     public class SocialLink
     {
         public int Id { get; set; }
-        public string Title { get; set; } = null!;
-        public string Description { get; set; } = null!;
-        public string Url { get; set; } = null!;
+        public string? Url { get; set; } 
         public bool IsVisible { get; set; }
-        public byte[] IconImage { get; set; } = null!;
-
-        public int ProfileId { get; set; }
-
-        public Profile? Profile { get; set; }
+        public int SocialProfileId { get; set; }
+        public int SocialNetworkId { get; set; }
+        public SocialProfile? SocialProfile { get; set; }
+        public SocialNetwork? SocialNetwork { get; set; }
 
     }
 }
