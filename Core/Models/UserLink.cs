@@ -2,7 +2,7 @@
 
 namespace SocialPulse.Core.Models
 {
-    public class UserLinks
+    public class UserLink
     {
         public int Id { get; set; }
         public string Title { get; set; } = null!;

@@ -5,7 +5,7 @@ namespace SocialPulse.Core
 {
     public interface ISocialPulseContext
     {
-        DbSet<UserLinks> UserLinks { get; set; }
+        DbSet<UserLink> UserLinks { get; set; }
         DbSet<SocialLink> SocialLinks { get; set; }
         DbSet<SocialNetwork> SocialNetworks { get; set; }
         DbSet<SocialProfile> SocialProfiles { get; set; }

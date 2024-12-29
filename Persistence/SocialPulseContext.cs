@@ -19,7 +19,7 @@ public class SocialPulseContext : IdentityDbContext<SocialPulseUser>, ISocialPul
         base.OnModelCreating(builder);
     }
 
-    public DbSet<UserLinks> UserLinks { get; set; }
+    public DbSet<UserLink> UserLinks { get; set; }
     public DbSet<SocialLink> SocialLinks { get; set; }
     public DbSet<SocialNetwork> SocialNetworks { get; set; }
     public DbSet<SocialProfile> SocialProfiles { get; set; }
