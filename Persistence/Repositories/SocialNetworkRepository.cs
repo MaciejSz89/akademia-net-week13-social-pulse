@@ -19,9 +19,9 @@ namespace SocialPulse.Persistence.Repositories
             return await _context.SocialNetworks.ToListAsync();
         }
 
-        public async Task<SocialNetwork> GetAsync(int id)
+        public async Task<SocialNetwork?> GetAsync(int id)
         {
-            return await _context.SocialNetworks.SingleAsync(x => x.Id == id);
+            return await _context.SocialNetworks.SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task AddAsync(SocialNetwork network)
@@ -32,6 +32,7 @@ namespace SocialPulse.Persistence.Repositories
         public async Task UpdateAsync(SocialNetwork network)
         {
             var networkToUpdate = await _context.SocialNetworks.SingleAsync(x => x.Id == network.Id);
+            if (networkToUpdate == null) throw new NullReferenceException("Social Network not found in database");
 
             CopyNetworkMembers(network, networkToUpdate);
         }
@@ -40,6 +41,7 @@ namespace SocialPulse.Persistence.Repositories
         public async Task DeleteAsync(int id)
         {
             var networkToDelete = await GetAsync(id);
+            if (networkToDelete == null) throw new NullReferenceException("Social Network not found in database");
 
             _context.SocialNetworks.Remove(networkToDelete);
         }
@@ -49,9 +51,9 @@ namespace SocialPulse.Persistence.Repositories
             return _context.SocialNetworks.ToList();
         }
 
-        public SocialNetwork Get(int id)
+        public SocialNetwork? Get(int id)
         {
-            return _context.SocialNetworks.Single(x => x.Id == id);
+            return _context.SocialNetworks.SingleOrDefault(x => x.Id == id);
         }
 
         public void Add(SocialNetwork network)
@@ -62,6 +64,7 @@ namespace SocialPulse.Persistence.Repositories
         public void Update(SocialNetwork network)
         {
             var networkToUpdate = _context.SocialNetworks.Single(x => x.Id == network.Id);
+            if (networkToUpdate == null) throw new NullReferenceException("Social Network not found in database");
 
             CopyNetworkMembers(network, networkToUpdate);
         }
@@ -69,6 +72,7 @@ namespace SocialPulse.Persistence.Repositories
         public void Delete(int id)
         {
             var networkToDelete = Get(id);
+            if (networkToDelete == null) throw new NullReferenceException("Social Network not found in database");
 
             _context.SocialNetworks.Remove(networkToDelete);
         }

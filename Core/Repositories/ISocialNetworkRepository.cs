@@ -3,7 +3,7 @@ using SocialPulse.Core.Models;
 
 namespace SocialPulse.Core.Repositories
 {
-    public interface ISocialNetworkRepository : IRepository<SocialNetwork>
+    public interface ISocialNetworkRepository : IRepository<SocialNetwork, int>
     {
     }
 }
