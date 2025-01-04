@@ -4,6 +4,7 @@ namespace SocialPulse.Core.Services
 {
     public interface ISocialNetworkService
     {
+        Task PopulateSocialNetworksFromJsonAsync(string jsonFilePath);
         Task UpsertSocialNetworksAsync(List<SocialNetwork> networks);
     }
 }

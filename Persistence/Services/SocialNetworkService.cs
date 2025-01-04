@@ -28,6 +28,7 @@ namespace SocialPulse.Persistence.Services
                 }
                 else
                 {
+                    network.Id = 0;
                     await _unitOfWork.SocialNetworkRepository.AddAsync(network);
                 }
             }
@@ -37,7 +38,6 @@ namespace SocialPulse.Persistence.Services
 
         public async Task PopulateSocialNetworksFromJsonAsync(string jsonFilePath)
         {
-            // Read and deserialize the JSON file
             var jsonData = await File.ReadAllTextAsync(jsonFilePath);
             var networks = JsonSerializer.Deserialize<List<SocialNetworkDto>>(jsonData);
 
@@ -46,28 +46,29 @@ namespace SocialPulse.Persistence.Services
                 throw new InvalidOperationException("No data found in the JSON file.");
             }
 
-            // Convert to entities and load images
             var socialNetworks = new List<SocialNetwork>();
             foreach (var networkDto in networks)
             {
-                // Convert image path to byte array
-                var iconBytes = File.Exists(networkDto.IconPath)
-                    ? await File.ReadAllBytesAsync(networkDto.IconPath)
-                    : Array.Empty<byte>();
-
-                // Map DTO to entity
-                socialNetworks.Add(new SocialNetwork
-                {
-                    Id = networkDto.Id,
-                    Name = networkDto.Name,
-                    Url = networkDto.Url,
-                    BaseDomain = networkDto.BaseDomain,
-                    Icon = iconBytes
-                });
+                socialNetworks.Add(await SocialNetworkFromDto(networkDto));
             }
 
-            // Upsert data using the existing service method
             await UpsertSocialNetworksAsync(socialNetworks);
+        }
+
+        private static async Task<SocialNetwork> SocialNetworkFromDto(SocialNetworkDto networkDto)
+        {
+            var iconBytes = File.Exists(networkDto.IconPath)
+                            ? await File.ReadAllBytesAsync(networkDto.IconPath)
+                            : Array.Empty<byte>();
+
+            return new SocialNetwork
+            {
+                Id = networkDto.Id,
+                Name = networkDto.Name,
+                Url = networkDto.Url,
+                BaseDomain = networkDto.BaseDomain,
+                Icon = iconBytes
+            };
         }
     }
 }

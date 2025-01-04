@@ -309,7 +309,7 @@ namespace SocialPulse.Migrations
                     b.ToTable("SocialProfiles");
                 });
 
-            modelBuilder.Entity("SocialPulse.Core.Models.UserLinks", b =>
+            modelBuilder.Entity("SocialPulse.Core.Models.UserLink", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -419,7 +419,7 @@ namespace SocialPulse.Migrations
                     b.Navigation("SocialPulseUser");
                 });
 
-            modelBuilder.Entity("SocialPulse.Core.Models.UserLinks", b =>
+            modelBuilder.Entity("SocialPulse.Core.Models.UserLink", b =>
                 {
                     b.HasOne("SocialPulse.Core.Models.SocialProfile", "SocialProfile")
                         .WithMany("UserLinks")
