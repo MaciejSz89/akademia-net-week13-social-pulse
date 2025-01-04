@@ -4,10 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using SocialPulse.Areas.Identity.Data;
 using SocialPulse.Core;
 using SocialPulse.Core.Models;
+using System.Reflection.Emit;
 
 namespace SocialPulse.Persistence;
 
-public class SocialPulseContext : IdentityDbContext<SocialPulseUser>, ISocialPulseContext
+public class SocialPulseContext : IdentityDbContext<SocialPulseUser>
 {
     public SocialPulseContext(DbContextOptions<SocialPulseContext> options)
         : base(options)

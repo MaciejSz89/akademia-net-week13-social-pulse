@@ -3,8 +3,13 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SocialPulse.Areas.Identity.Data;
+using SocialPulse.Core;
 using SocialPulse.Core.Models.Settings;
+using SocialPulse.Core.Repositories;
+using SocialPulse.Core.Services;
 using SocialPulse.Persistence;
+using SocialPulse.Persistence.Repositories;
+using SocialPulse.Persistence.Services;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("SocialPulseContextConnection") ?? throw new InvalidOperationException("Connection string 'SocialPulseContextConnection' not found.");
 
@@ -25,6 +30,10 @@ builder.Services.AddDefaultIdentity<SocialPulseUser>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>()
+                .AddScoped<ISocialNetworkService, SocialNetworkService>()
+                .AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Register the email sender if email settings are configured
 if (isEmailConfigured)
@@ -57,6 +66,17 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<SocialPulseContext>();
     dbContext.Database.EnsureCreated();
+
+    var socialNetworkService = scope.ServiceProvider.GetRequiredService<ISocialNetworkService>();
+    var socialNetworksJsonFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/data/social_networks.json");
+
+    await socialNetworkService.PopulateSocialNetworksFromJsonAsync(socialNetworksJsonFilePath);
+}
+
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
