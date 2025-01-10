@@ -30,6 +30,7 @@ builder.Services.AddDefaultIdentity<SocialPulseUser>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>()
                 .AddScoped<ISocialNetworkService, SocialNetworkService>()
