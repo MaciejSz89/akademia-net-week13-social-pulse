@@ -232,17 +232,14 @@ namespace SocialPulse.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsVisible")
-                        .HasColumnType("bit");
+                    b.Property<string>("RemainingUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SocialNetworkId")
                         .HasColumnType("int");
 
                     b.Property<int>("SocialProfileId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

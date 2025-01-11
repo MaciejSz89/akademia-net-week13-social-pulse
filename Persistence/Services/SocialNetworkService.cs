@@ -70,5 +70,10 @@ namespace SocialPulse.Persistence.Services
                 Icon = iconBytes
             };
         }
+
+        public async Task<IEnumerable<SocialNetwork>> GetAsync()
+        {
+            return await _unitOfWork.SocialNetworkRepository.GetAsync();
+        }
     }
 }
