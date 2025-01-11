@@ -7,7 +7,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-5">
             <section>
                 <form id="account" method="post">
                     <h2>@ViewData["Title"]</h2>
@@ -15,6 +15,25 @@
 
                     @Html.AntiForgeryToken()
                     @Html.HiddenFor(x => x.Id)
+
+                    <div class="mb-3">
+                        <div class="text-center">
+                            <img id="ProfileImagePreview" 
+                                 src="@Model.ProfileImageBase64"
+                                 alt="Profile Image"
+                                 class="rounded-circle img-thumbnail mb-3"
+                                 style="width: 150px; height: 150px;">
+                        </div>
+                        <div>
+                            <label asp-for="ProfileImage" class="form-label">Załaduj nowe zdjęcie profilowe</label>
+                            <input asp-for="ProfileImage"
+                                   type="file"
+                                   class="form-control"
+                                   id="ProfileImage"
+                                   accept="image/*" />
+                            <span asp-validation-for="ProfileImage" class="text-danger"></span>
+                        </div>
+                    </div>
 
                     <div class="form-floating mb-3">
                         <input asp-for="UserName"
@@ -55,23 +74,33 @@
 
                     <h4>Social links</h4>
                     <table class="table align-middle">
-                        @foreach (var socialLink in Model.SocialLinks)
+                        @for (var i = 0; i < Model.SocialLinks.Count; i++)
                         {
                             <tr>
-                                <td class="align-middle" style="width: 50px;">
-                                    <img src="@socialLink.SocialNetwork.Icon"
-                                         alt="@socialLink.SocialNetwork.Name"
+                                <td class="align-middle" style="white-space: nowrap;">
+                                    <img src="@Model.SocialLinks[i].SocialNetwork.IconBase64"
+                                         alt="@Model.SocialLinks[i].SocialNetwork.Name"
                                          style="width: 24px; height: 24px;">
                                 </td>
-                                <td class="align-middle" style="width: 50%;">
-                                    <span>@socialLink.SocialNetwork.BaseDomain</span>
+                                <td class="align-middle" style="white-space: nowrap;">
+                                    <span>@Model.SocialLinks[i].SocialNetwork.Url</span>
                                 </td>
-                                <td class="align-middle">
-                                    <span>@socialLink.RemainingUrl</span>
+                                <td class="align-middle w-100">
+                                    <input asp-for="SocialLinks[@i].RemainingUrl"
+                                           class="form-control"
+                                           aria-required="true"
+                                           placeholder="Tu wpisz resztę adresu..." />
                                 </td>
                             </tr>
                         }
                     </table>
+
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" 
+                            class="btn btn-primary">
+                            Zapisz
+                        </button>
+                    </div>
                 </form>
             </section>
         </div>
@@ -81,4 +110,27 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const profileImageInput = document.getElementById("ProfileImage");
+            const profileImagePreview = document.getElementById("ProfileImagePreview");
+
+            profileImageInput.addEventListener("change", function () {
+                const file = this.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+
+                    // When the image file is loaded
+                    reader.onload = function (e) {
+                        profileImagePreview.src = e.target.result; // Set the preview image's source
+                    };
+
+                    // Read the image file as a Data URL
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
 }

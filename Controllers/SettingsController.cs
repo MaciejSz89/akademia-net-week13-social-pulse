@@ -16,9 +16,9 @@ namespace SocialPulse.Controllers
             _mapper = serviceProvider.GetRequiredService<IMapper>();
         }
 
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
-            var socialNetworks = _mapper.Map<List<SocialNetworkViewModel>>(_socialNetworkService.GetAsync());
+            var socialNetworks = _mapper.Map<List<SocialNetworkViewModel>>(await _socialNetworkService.GetAsync());
             List<SocialLinkViewModel> links = new List<SocialLinkViewModel>();
 
             foreach (var socialNetwork in socialNetworks)

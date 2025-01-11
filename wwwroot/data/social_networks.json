@@ -2,21 +2,21 @@
   {
     "Id": 1,
     "Name": "Facebook",
-    "Url": "https://www.facebook.com",
+    "Url": "https://www.facebook.com/",
     "BaseDomain": "facebook.com",
     "IconPath": "wwwroot/images/facebook.png"
   },
   {
     "Id": 2,
     "Name": "Instagram",
-    "Url": "https://www.instagram.com",
+    "Url": "https://www.instagram.com/",
     "BaseDomain": "instagram.com",
     "IconPath": "wwwroot/images/instagram.png"
   },
   {
     "Id": 3,
     "Name": "X",
-    "Url": "https://www.x.com",
+    "Url": "https://www.x.com/",
     "BaseDomain": "x.com",
     "IconPath": "wwwroot/images/x.png"
   }
