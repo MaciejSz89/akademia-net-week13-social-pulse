@@ -38,5 +38,19 @@ namespace SocialPulse.Controllers
 
             return View(vm);
         }
+        public IActionResult MyLinks()
+        {
+            var model = new SocialProfileViewModel
+            {
+                UserName = "John Doe",
+                UserLinks = new List<UserLinkViewModel>
+                            {
+                                new UserLinkViewModel { Id = 1, Title = "Facebook", Url = "https://facebook.com/johndoe" },
+                                new UserLinkViewModel { Id = 2, Title = "Twitter", Url = "https://twitter.com/johndoe" }
+                            }
+            };
+
+            return View(model);
+        }
     }
 }
