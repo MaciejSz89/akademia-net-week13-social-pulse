@@ -36,6 +36,7 @@
                                 <tr>
                                     <td>@(i + 1)</td>
                                     <td>
+                                        <input type="hidden" name="UserLinks[@i].Id" value="@Model.UserLinks[i].Id" />
                                         <input asp-for="UserLinks[@i].Title"
                                                class="form-control"
                                                placeholder="Enter title" />
@@ -55,14 +56,16 @@
                                         }
                                         else
                                         {
-                                            <span>Brak obrazka</span>
+                                            <span class="text-muted">Brak obrazka</span>
                                         }
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-success btn-sm">
+                                        <button type="button" class="btn btn-success btn-sm save-link">
                                             Zapisz
                                         </button>
-                                        <button type="button" class="btn btn-danger btn-sm">
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm remove-link"
+                                                onclick="removeLink(this)">
                                             Usuń
                                         </button>
                                     </td>
@@ -74,7 +77,7 @@
             </div>
 
             <div class="mt-3">
-                <h4>Add New Link</h4>
+                <h4>Dodaj link</h4>
                 <div class="row g-3">
                     <div class="col-md-4">
                         <input type="text" id="newLinkTitle" class="form-control" placeholder="Enter title" />
@@ -86,8 +89,11 @@
                         <input type="file" id="newLinkImage" class="form-control" />
                     </div>
                     <div class="col-md-1">
-                        <button type="button" class="btn btn-primary" id="addLinkButton">
-                            <i class="bi bi-plus-circle"></i> Add
+                        <button type="button" 
+                                class="btn btn-primary" 
+                                id="addLinkButton"
+                                onclick="addLink()">
+                            <i class="bi bi-plus-circle"></i> Dodaj
                         </button>
                     </div>
                 </div>
@@ -99,112 +105,100 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            // Add New Link
-            $("#addLinkButton").on("click", function () {
-                const title = $("#newLinkTitle").val().trim();
-                const url = $("#newLinkUrl").val().trim();
-                const imageInput = $("#newLinkImage")[0];
-                const validationMessage = $("#validationMessage");
 
-                // Clear validation message
-                validationMessage.hide().text("");
+        function addLink(){
+            const title = $("#newLinkTitle").val().trim();
+            const url = $("#newLinkUrl").val().trim();
+            const imageInput = $("#newLinkImage")[0];
+            const validationMessage = $("#validationMessage");
 
-                // Validation logic
-                if (!title) {
-                    validationMessage.text("Tytuł jest wymagany.").show();
-                    return;
-                }
+            validationMessage.hide().text("");
 
-                if (!url) {
-                    validationMessage.text("Adres URL jest wymagany.").show();
-                    return;
-                }
+            if (!title) {
+                validationMessage.text("Tytuł jest wymagany.").show();
+                return;
+            }
 
-                if (!isValidUrl(url)) {
-                    validationMessage.text("Adres URL jest nieprawidłowy.").show();
-                    return;
-                }
+            if (!url) {
+                validationMessage.text("Adres URL jest wymagany.").show();
+                return;
+            }
 
-              if (imageInput.files.length > 0) {
-                    const file = imageInput.files[0];
-                    if (!file.type.startsWith("image/")) {
-                        validationMessage.text("The uploaded file must be an image.").show();
-                        return;
-                    }
+            if (!isValidUrl(url)) {
+                validationMessage.text("Adres URL jest nieprawidłowy.").show();
+                return;
+            }
 
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        // Add new link row to the table
-                        const newRow = `
-                            <tr>
-                                <td>#</td>
-                                <td><input type="text" value="${title}" class="form-control" placeholder="Enter title" /></td>
-                                <td><input type="text" value="${url}" class="form-control" placeholder="Enter URL" /></td>
-                                <td><img src="${e.target.result}" alt="Link Image" class="img-thumbnail" style="width: 50px; height: 50px;" /></td>
-                                <td>
-                                    <button type="button" class="btn btn-success btn-sm save-link">
-                                        <i class="bi bi-save"></i> Save
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm remove-link">
-                                        <i class="bi bi-trash"></i> Remove
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
 
-                        $("#userLinksTable tbody").append(newRow);
-                        clearInputs();
-                    };
+            const formData = new FormData();
+            formData.append("Title", title);
+            formData.append("Url", url);
 
-                    reader.readAsDataURL(file);
-                } else {
-                    // Add new link row without image
-                    const newRow = `
-                        <tr>
-                            <td>#</td>
-                            <td><input type="text" value="${title}" class="form-control" placeholder="Enter title" /></td>
-                            <td><input type="text" value="${url}" class="form-control" placeholder="Enter URL" /></td>
-                            <td><span class="text-muted">No Image</span></td>
-                            <td>
-                                <button type="button" class="btn btn-success btn-sm save-link">
-                                    <i class="bi bi-save"></i> Save
-                                </button>
-                                <button type="button" class="btn btn-danger btn-sm remove-link">
-                                    <i class="bi bi-trash"></i> Remove
-                                </button>
-                            </td>
-                        </tr>
-                    `;
+            if (imageInput.files.length > 0) {
+                formData.append("Image", imageInput.files[0]);
+            }
 
+            // Send the data to the server via POST
+            $.ajax({
+                url: '@Url.Action("AddUserLink", "Settings")',
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: function (response) {
+                    const newRow = $(response);
+
+                    // Update the index for the new row
+                    const currentRowCount = $("#userLinksTable tbody tr").length;
+                    newRow.find("input, td").each(function () {
+                        const input = $(this);
+                        const nameAttr = input.attr("name");
+
+                        if (nameAttr) {
+                            input.attr("name", nameAttr.replace("Index", currentRowCount));
+                        }
+                    });
+
+                    // Append the new row to the table
                     $("#userLinksTable tbody").append(newRow);
+
+                    // Update row numbers
+                    updateRowsNumeration();
+
+                    // Clear the input fields
                     clearInputs();
+                },
+                error: function (xhr) {
+                    validationMessage.text(xhr.responseText || "Wystąpił błąd podczas dodawania linku.").show();
                 }
-
-
             });
+        }
 
-            // Remove Link
-            $("#userLinksTable").on("click", ".remove-link", function () {
-                $(this).closest("tr").remove();
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function clearInputs() {
+            $("#newLinkTitle").val("");
+            $("#newLinkUrl").val("");
+            $("#newLinkImage").val("");
+        }
+
+        function removeLink(btn){
+            $(btn).closest("tr").remove();
+            updateRowsNumeration();
+        }
+
+        function updateRowsNumeration() {
+            $("#userLinksTable tbody tr").each(function (index, row) {
+                $(row).find("td:first").text(index + 1);
             });
+        }
 
-            // Validate URL
-            function isValidUrl(string) {
-                try {
-                    new URL(string);
-                    return true;
-                } catch (_) {
-                    return false;
-                }
-            }
-
-            // Clear input fields
-            function clearInputs() {
-                $("#newLinkTitle").val("");
-                $("#newLinkUrl").val("");
-                $("#newLinkImage").val("");
-            }
-        });
     </script>
 }

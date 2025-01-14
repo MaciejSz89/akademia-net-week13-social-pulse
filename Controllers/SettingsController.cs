@@ -52,5 +52,18 @@ namespace SocialPulse.Controllers
 
             return View(model);
         }
+
+        [HttpPost]
+        public IActionResult AddUserLink([FromForm] UserLinkViewModel newLink)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid input data.");
+            }
+
+            newLink.Id = new Random().Next(1, 1000); 
+
+            return PartialView("_UserLinkRowPartial", newLink);
+        }
     }
 }
