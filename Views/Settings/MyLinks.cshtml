@@ -138,7 +138,6 @@
                 formData.append("Image", imageInput.files[0]);
             }
 
-            // Send the data to the server via POST
             $.ajax({
                 url: '@Url.Action("AddUserLink", "Settings")',
                 type: 'POST',
@@ -146,9 +145,13 @@
                 contentType: false,
                 data: formData,
                 success: function (response) {
-                    const newRow = $(response);
+                    if(!response.isSuccess){
+                        logger.error(response.message);
+                        validationMessage.text("Wystąpił błąd podczas dodawania linku.").show();
+                        return;
+                    }
+                    const newRow = $(response.data);
 
-                    // Update the index for the new row
                     const currentRowCount = $("#userLinksTable tbody tr").length;
                     newRow.find("input, td").each(function () {
                         const input = $(this);
@@ -159,17 +162,15 @@
                         }
                     });
 
-                    // Append the new row to the table
                     $("#userLinksTable tbody").append(newRow);
 
-                    // Update row numbers
                     updateRowsNumeration();
 
-                    // Clear the input fields
-                    clearInputs();
+                    clearNewLinkInputs();
                 },
                 error: function (xhr) {
-                    validationMessage.text(xhr.responseText || "Wystąpił błąd podczas dodawania linku.").show();
+                    logger.error(xhr.responseText);
+                    validationMessage.text("Wystąpił błąd podczas dodawania linku.").show();
                 }
             });
         }
@@ -183,7 +184,7 @@
             }
         }
 
-        function clearInputs() {
+        function clearNewLinkInputs() {
             $("#newLinkTitle").val("");
             $("#newLinkUrl").val("");
             $("#newLinkImage").val("");

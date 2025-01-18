@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SocialPulse.Core.Dtos.Response;
 using SocialPulse.Core.Services;
 using SocialPulse.Core.ViewModels;
 
@@ -9,11 +10,13 @@ namespace SocialPulse.Controllers
     {
         private readonly ISocialNetworkService _socialNetworkService;
         private readonly IMapper _mapper;
+        private readonly IViewRenderService _viewRenderService;
 
         public SettingsController(IServiceProvider serviceProvider)
         {
             _socialNetworkService = serviceProvider.GetRequiredService<ISocialNetworkService>();
             _mapper = serviceProvider.GetRequiredService<IMapper>();
+            _viewRenderService = serviceProvider.GetRequiredService<IViewRenderService>();
         }
 
         public async Task<IActionResult> Profile()
@@ -54,16 +57,31 @@ namespace SocialPulse.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddUserLink([FromForm] UserLinkViewModel newLink)
+        public async Task<IActionResult> AddUserLink([FromForm] UserLinkViewModel newLink)
         {
+            ResponseDto response;
+
             if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid input data.");
+                response = new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = "Invalid input data."
+                };
             }
+            else
+            {
+                newLink.Id = new Random().Next(1, 1000);
 
-            newLink.Id = new Random().Next(1, 1000); 
+                response = new ResponseDto<string>
+                {
+                    IsSuccess = true,
+                    Data = await _viewRenderService.RenderToStringAsync("_UserLinkRowPartial", newLink)
+                };
+                
+            }          
 
-            return PartialView("_UserLinkRowPartial", newLink);
+            return Json(response);
         }
     }
 }
