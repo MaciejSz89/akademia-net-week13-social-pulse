@@ -1,4 +1,4 @@
-﻿namespace SocialPulse.Core.Dtos.Response
+﻿namespace SocialPulse.Core.Dtos
 {
 
     public class ResponseDto

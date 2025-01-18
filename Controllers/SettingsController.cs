@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using SocialPulse.Core.Dtos.Response;
+using SocialPulse.Core.Dtos;
 using SocialPulse.Core.Services;
 using SocialPulse.Core.ViewModels;
 
@@ -57,31 +57,40 @@ namespace SocialPulse.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddUserLink([FromForm] UserLinkViewModel newLink)
+        public async Task<IActionResult> AddUserLink([FromForm] UserLinkDto newLinkDto, IFormFile image)
         {
-            ResponseDto response;
 
             if (!ModelState.IsValid)
             {
-                response = new ResponseDto
+                return Json(new ResponseDto
                 {
                     IsSuccess = false,
                     Message = "Invalid input data."
-                };
+                });
             }
-            else
-            {
-                newLink.Id = new Random().Next(1, 1000);
 
-                response = new ResponseDto<string>
+            var newLink = _mapper.Map<UserLinkViewModel>(newLinkDto);
+            newLink.Id = new Random().Next(1, 1000);
+
+            if (image != null)
+            {
+                using (var ms = new MemoryStream())
                 {
-                    IsSuccess = true,
-                    Data = await _viewRenderService.RenderToStringAsync("_UserLinkRowPartial", newLink)
-                };
-                
-            }          
+                    image.CopyTo(ms);
+                    var fileBytes = ms.ToArray();
+                    newLink.Image = fileBytes;
+                }
+            }
+
+            var response = new ResponseDto<string>
+            {
+                IsSuccess = true,
+                Data = await _viewRenderService.RenderToStringAsync("_UserLinkRowPartial", newLink)
+            };
 
             return Json(response);
+
+
         }
     }
 }

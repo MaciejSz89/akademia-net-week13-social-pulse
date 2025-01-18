@@ -33,43 +33,8 @@
                         {
                             @for (var i = 0; i < Model.UserLinks.Count; i++)
                             {
-                                <tr>
-                                    <td>@(i + 1)</td>
-                                    <td>
-                                        <input type="hidden" name="UserLinks[@i].Id" value="@Model.UserLinks[i].Id" />
-                                        <input asp-for="UserLinks[@i].Title"
-                                               class="form-control"
-                                               placeholder="Enter title" />
-                                    </td>
-                                    <td>
-                                        <input asp-for="UserLinks[@i].Url"
-                                               class="form-control"
-                                               placeholder="Enter URL" />
-                                    </td>
-                                    <td>
-                                        @if (Model.UserLinks[i].Image != null)
-                                        {
-                                            <img src="@Model.UserLinks[i].ImageBase64"
-                                                 alt="Obrazek linku"
-                                                 class="img-thumbnail"
-                                                 style="width: 50px; height: 50px;" />
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Brak obrazka</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-success btn-sm save-link">
-                                            Zapisz
-                                        </button>
-                                        <button type="button"
-                                                class="btn btn-danger btn-sm remove-link"
-                                                onclick="removeLink(this)">
-                                            Usuń
-                                        </button>
-                                    </td>
-                                </tr>
+                                ViewData["Index"] = i;
+                                <partial name="_UserLinkRowPartial" model="Model.UserLinks[i]" view-data="ViewData" />
                             }
                         }
                     </tbody>
@@ -132,9 +97,10 @@
 
             const formData = new FormData();
             formData.append("Title", title);
-            formData.append("Url", url);
+            formData.append("Url", url);      
 
             if (imageInput.files.length > 0) {
+                console.log(imageInput.files[0])
                 formData.append("Image", imageInput.files[0]);
             }
 
@@ -146,7 +112,7 @@
                 data: formData,
                 success: function (response) {
                     if(!response.isSuccess){
-                        logger.error(response.message);
+                        console.error(response.message);
                         validationMessage.text("Wystąpił błąd podczas dodawania linku.").show();
                         return;
                     }
@@ -154,13 +120,13 @@
 
                     const currentRowCount = $("#userLinksTable tbody tr").length;
                     newRow.find("input, td").each(function () {
-                        const input = $(this);
-                        const nameAttr = input.attr("name");
+                                                      const input = $(this);
+                                                      const nameAttr = input.attr("name");
 
-                        if (nameAttr) {
-                            input.attr("name", nameAttr.replace("Index", currentRowCount));
-                        }
-                    });
+                                                      if (nameAttr) {
+                                                          input.attr("name", nameAttr.replace("Index", currentRowCount));
+                                                      }
+                                                  });
 
                     $("#userLinksTable tbody").append(newRow);
 
@@ -169,7 +135,7 @@
                     clearNewLinkInputs();
                 },
                 error: function (xhr) {
-                    logger.error(xhr.responseText);
+                    console.error(xhr.responseText);
                     validationMessage.text("Wystąpił błąd podczas dodawania linku.").show();
                 }
             });

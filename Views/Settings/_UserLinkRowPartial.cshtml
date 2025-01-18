@@ -1,17 +1,30 @@
 ﻿@using SocialPulse.Core.ViewModels
 @model UserLinkViewModel
 
+@{
+    var index = ViewData["Index"] ?? "Index";
+}
+
 <tr>
-    <td></td>
     <td>
-        <input type="hidden" name="UserLinks[Index].Id" value="@Model.Id" />
-        <input type="text" class="form-control" name="UserLinks[Index].Title" value="@Model.Title" placeholder="Enter title" />
+        @if (index is int intIndexForRow)
+        {
+            @(intIndexForRow + 1)
+        }
+        else
+        {
+            @index
+        }
     </td>
     <td>
-        <input type="text" class="form-control" name="UserLinks[Index].Url" value="@Model.Url" placeholder="Enter URL" />
+        <input type="hidden" name="UserLinks[@index].Id" value="@Model.Id" />
+        <input type="text" class="form-control" name="UserLinks[@index].Title" value="@Model.Title" placeholder="Enter title" />
     </td>
     <td>
-        @if (Model.Image != null)
+        <input type="text" class="form-control" name="UserLinks[@index].Url" value="@Model.Url" placeholder="Enter URL" />
+    </td>
+    <td>
+        @if (Model.ImageBase64 != null)
         {
             <img src="@Model.ImageBase64" alt="Obrazek linku" class="img-thumbnail" style="width: 50px; height: 50px;" />
         }
@@ -19,7 +32,7 @@
         {
             <span class="text-muted">Brak obrazka</span>
         }
-        <input type="hidden" name="UserLinks[Index].ImageBase64" value="@Model.ImageBase64" />
+        <input type="hidden" name="UserLinks[@index].ImageBase64" value="@Model.ImageBase64" />
     </td>
     <td>
         <button type="button" 

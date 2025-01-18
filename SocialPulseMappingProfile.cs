@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SocialPulse.Core.Dtos;
 using SocialPulse.Core.Models;
 using SocialPulse.Core.ViewModels;
 
@@ -16,6 +17,8 @@ namespace SocialPulse
             CreateMap<SocialNetworkViewModel, SocialNetwork>();
             CreateMap<UserLink, UserLinkViewModel>();
             CreateMap<UserLinkViewModel, UserLink>();
+            CreateMap<UserLinkDto, UserLinkViewModel>();
+            CreateMap<UserLinkViewModel, UserLinkDto>();
         }
     }
 }
