@@ -34,7 +34,9 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>()
                 .AddScoped<ISocialNetworkService, SocialNetworkService>()
-                .AddScoped<IUnitOfWork, UnitOfWork>();
+                .AddScoped<IUnitOfWork, UnitOfWork>()
+                .AddScoped<IViewRenderService, ViewRenderService>()
+                .AddHttpContextAccessor(); ;
 
 // Register the email sender if email settings are configured
 if (isEmailConfigured)

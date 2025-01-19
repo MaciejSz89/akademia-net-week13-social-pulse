@@ -1,0 +1,68 @@
+﻿@using SocialPulse.Core.ViewModels
+@model UserLinkViewModel
+
+@{
+    var index = ViewData["Index"] ?? "Index";
+}
+
+<tr>
+    <td>
+        @if (index is int intIndexForRow)
+        {
+            @(intIndexForRow + 1)
+        }
+        else
+        {
+            @index
+        }
+    </td>
+    <td>
+        <input type="hidden" name="UserLinks[@index].Id" value="@Model.Id" />
+        <input type="text" class="form-control" name="UserLinks[@index].Title" value="@Model.Title" placeholder="Wpisz tytuł..." />
+        <span id="title-validation-@index" class="text-danger small d-block" style="display: none;"></span>
+    </td>
+    <td>
+        <input type="text" class="form-control" name="UserLinks[@index].Url" value="@Model.Url" placeholder="Wpisz adres URL..." />
+        <span id="url-validation-@index" class="text-danger small d-block" style="display: none;"></span>
+    </td>
+    <td>
+        @if (Model.Image != null)
+        {
+            <img id="imagePreview-@index" src="@Model.ImageBase64" alt="Preview" class="img-thumbnail" style="width: 50px; height: 50px; display: inline;" />
+            <span id="noImageSpan-@index" class="text-muted" style="display: none;">Brak obrazka</span>
+        }
+        else
+        {
+            <img id="imagePreview-@index" src="" alt="Preview" class="img-thumbnail" style="width: 50px; height: 50px; display: none;" />
+            <span id="noImageSpan-@index" class="text-muted" style="display: inline;">Brak obrazka</span>
+        }
+        <input type="hidden" name="UserLinks[@index].ImageBase64" value="@Model.ImageBase64" id="hiddenImage-@index" />
+        <button type="button" id="imageButton-@index" class="btn btn-primary btn-sm" onclick="changeImage(this)">
+            @if (Model.Image != null)
+            {
+                <text>Zmień obrazek</text>
+            }
+            else
+            {
+                <text>Dodaj obrazek</text>
+            }
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="removeImage(this)">
+            Usuń obrazek
+        </button>
+        <input type="file" class="form-control form-control-sm change-image-input" id="fileInput-@index" style="display: none;" onchange="previewImage(this)" />
+        <span id="image-validation-@index" class="text-danger small d-block" style="display: none;"></span>
+    </td>
+    <td>
+        <button type="button" 
+                class="btn btn-success btn-sm save-link"
+                onclick="saveLink(this)">
+            Zapisz
+        </button>
+        <button type="button" 
+                class="btn btn-danger btn-sm remove-link" 
+                onclick="removeLink(this)">
+            Usuń
+        </button>
+    </td>
+</tr>
