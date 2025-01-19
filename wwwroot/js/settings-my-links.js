@@ -59,6 +59,11 @@
             }
             const newRow = $(response.data);
 
+            const noLinksRow = $("#noLinks");
+            if (noLinksRow.length > 0) {
+                noLinksRow.remove();
+            }
+
             $("#userLinksTable tbody").append(newRow);
 
             updateRowsNumeration();
@@ -153,6 +158,11 @@ function removeLink(button) {
     const $row = $button.closest("tr");
     const id = $row.find("input[type='hidden'][name*='].Id']").val();
 
+    const confirmation = confirm("Czy na pewno chcesz usunąć ten link?");
+    if (!confirmation) {
+        return; 
+    }
+
     console.log("Id of the object associated with this row:", id);
 
     if (id) {
@@ -164,6 +174,13 @@ function removeLink(button) {
                 if (response.isSuccess) {
                     $row.remove();
                     updateRowsNumeration();
+                    if ($("#userLinksTable tbody tr").length === 0) {
+                        $("#userLinksTable tbody").append(`
+                            <tr id="noLinks" >
+                                <td colspan="5" class="text-center">Brak linków.</td>
+                            </tr>
+                        `);
+                    }
                 } else {
                     console.error(response.message);
                     alert("Coś poszło nie tak.");
