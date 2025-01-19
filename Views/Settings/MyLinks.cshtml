@@ -44,27 +44,22 @@
             <div class="mt-3">
                 <h4>Dodaj link</h4>
                 <div class="row g-3 align-items-center">
-                    <!-- Title Input -->
                     <div class="col-md-4">
                         <input type="text" id="newLinkTitle" class="form-control" placeholder="Wpisz tytuł..." />
                         <span id="newLinkTitleValidation" class="text-danger small d-block" style="display: none;"></span>
                     </div>
 
-                    <!-- URL Input -->
                     <div class="col-md-4">
                         <input type="text" id="newLinkUrl" class="form-control" placeholder="Wpisz adres URL..." />
                         <span id="newLinkUrlValidation" class="text-danger small d-block" style="display: none;"></span>
                     </div>
 
-                    <!-- Image Section -->
                     <div class="col-md-4">
                         <div class="d-flex align-items-center gap-3">
-                            <!-- Image Preview -->
                             <img id="newImagePreview" src="" alt="Preview" class="img-thumbnail"
                                  style="width: 50px; height: 50px; display: none;" />
                             <span id="newNoImageSpan" class="text-muted">Brak obrazka</span>
 
-                            <!-- Buttons -->
                             <div>
                                 <button type="button" class="btn btn-primary btn-sm me-2" onclick="triggerFileInput('newLinkImage')">
                                     Dodaj obrazek
@@ -75,19 +70,16 @@
                             </div>
                         </div>
 
-                        <!-- Hidden Base64 Input -->
                         <input type="hidden" id="newHiddenImage" name="newLinkImageBase64" value="" />
 
-                        <!-- File Input -->
                         <input type="file" id="newLinkImage" class="form-control form-control-sm change-image-input"
                                style="display: none;" onchange="previewNewImage(this)" />
                         <span id="newLinkImageValidation" class="text-danger small d-block" style="display: none;"></span>
                     </div>
 
-                    <!-- Add Link Button -->
-                    <div class="col-md-1">
+                    <div class="col-md-2">
                         <button type="button" class="btn btn-primary" id="addLinkButton" onclick="addLink()">
-                            <i class="bi bi-plus-circle"></i> Dodaj
+                            Dodaj link
                         </button>
                     </div>
                 </div>
@@ -97,391 +89,5 @@
 </div>
 
 @section Scripts {
-    <script>
-
-        function addLink(){
-            const titleInput = $("#newLinkTitle");
-            const urlInput = $("#newLinkUrl");
-            const imageInput = $("#newLinkImage")[0];
-
-            const titleValidation = $("#newLinkTitleValidation");
-            const urlValidation = $("#newLinkUrlValidation");
-            const imageValidation = $("#newLinkImageValidation");
-
-            titleValidation.text("").hide();
-            urlValidation.text("").hide();
-            imageValidation.text("").hide();
-
-            let isValid = true;
-
-            const title = titleInput.val().trim();
-            if (!title) {
-                titleValidation.text("Tytuł jest wymagany.").show();
-                isValid = false;
-            }
-
-            const url = urlInput.val().trim();
-            if (!url) {
-                urlValidation.text("Adres URL jest wymagany.").show();
-                isValid = false;
-            } else if (!isValidUrl(url)) {
-                urlValidation.text("Adres URL jest nieprawidłowy.").show();
-                isValid = false;
-            }
-
-            if (imageInput && imageInput.files.length > 0) {
-                const file = imageInput.files[0];
-
-                const maxSize = 2 * 1024 * 1024; 
-                if (file.size > maxSize) {
-                    imageValidation.text("Rozmiar pliku nie może przekraczać 2MB.").show();
-                    isValid = false;
-                }
-
-                const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-                if (!allowedTypes.includes(file.type)) {
-                    imageValidation.text("Nieprawidłowy typ pliku. Dozwolone: JPG, PNG, WEBP.").show();
-                    isValid = false;
-                }
-            }
-        
-            if (!isValid) {
-                return; 
-            }
-
-            const formData = new FormData();
-            formData.append("Title", title);
-            formData.append("Url", url);
-
-            if (imageInput.files.length > 0) {
-                console.log(imageInput.files[0])
-                formData.append("Image", imageInput.files[0]);
-            }
-
-            $.ajax({
-                url: '@Url.Action("AddUserLink", "Settings")',
-                type: 'POST',
-                processData: false,
-                contentType: false,
-                data: formData,
-                success: function (response) {
-                    if(!response.isSuccess){
-                        console.error(response.message);
-                        validationMessage.text("Wystąpił błąd podczas dodawania linku.").show();
-                        return;
-                    }
-                    const newRow = $(response.data);
-
-                    $("#userLinksTable tbody").append(newRow);
-
-                    updateRowsNumeration();
-
-                    clearNewLinkInputs();
-                },
-                error: function (xhr) {
-                    console.error(xhr.responseText);
-                    validationMessage.text("Wystąpił błąd podczas dodawania linku.").show();
-                }
-            });            
-        }
-
-        function saveLink(button) {
-            const $button = $(button); 
-            const $row = $button.closest("tr"); 
-
-            // Extract values from the row
-            const id = $row.find("input[type='hidden'][name*='].Id']").val();
-            const titleInput = $row.find("input[type='text'][name*='].Title']");
-            const urlInput = $row.find("input[type='text'][name*='].Url']");
-            const imageInput = $row.find("input[type='file']").get(0); 
-
-
-            const titleValidation = $row.find(`#title-validation-${$row.index()}`);
-            const urlValidation = $row.find(`#url-validation-${$row.index()}`);
-            const imageValidation = $row.find(`#image-validation-${$row.index()}`);
-
-            titleValidation.text("").hide();
-            urlValidation.text("").hide();
-            imageValidation.text("").hide();
-
-            let isValid = true;
-
-            const title = titleInput.val().trim();
-            if (!title) {
-                titleValidation.text("Tytuł jest wymagany.").show();
-                isValid = false;
-            }
-
-            const url = urlInput.val().trim();
-            if (!url) {
-                urlValidation.text("Adres URL jest wymagany.").show();
-                isValid = false;
-            } else if (!isValidUrl(url)) {
-                urlValidation.text("Adres URL jest nieprawidłowy.").show();
-                isValid = false;
-            }
-
-            if (imageInput && imageInput.files.length > 0) {
-            const file = imageInput.files[0];
-
-            const maxSize = 2 * 1024 * 1024;
-            if (file.size > maxSize) {
-                imageValidation.text("Rozmiar pliku nie może przekraczać 2MB.").show();
-                isValid = false;
-            }
-
-            const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-            if (!allowedTypes.includes(file.type)) {
-                imageValidation.text("Nieprawidłowy typ pliku. Dozwolone: JPG, PNG, WEBP.").show();
-                isValid = false;
-            }
-        }
-
-            if (!isValid) {
-                return; 
-            }
-
-            const formData = new FormData();
-            formData.append("Id", id);
-            formData.append("Title", title);
-            formData.append("Url", url);
-
-            if (imageInput && imageInput.files.length > 0) {
-                formData.append("Image", imageInput.files[0]); 
-            }
-
-            $.ajax({
-                url: '@Url.Action("SaveUserLink", "Settings")',
-                type: 'POST',
-                processData: false,
-                contentType: false,
-                data: formData,
-                success: function (response) {
-                    if (!response.isSuccess) {
-                        console.error(response.message);
-                        validationMessage.text("Wystąpił błąd podczas zapisywania linku.").show();
-                        return;
-                    }
-
-                    console.log("Link saved successfully:", response);
-
-                    alert("Link został zapisany pomyślnie.");
-                },
-                error: function (xhr) {
-                    console.error(xhr.responseText);
-                    validationMessage.text("Wystąpił błąd podczas zapisywania linku.").show();
-                }
-            });
-        }
-
-        function removeLink(button) {
-            const $button = $(button);
-            const $row = $button.closest("tr");
-            const id = $row.find("input[type='hidden'][name*='].Id']").val();
-
-            console.log("Id of the object associated with this row:", id);
-
-            if (id) {
-                $.ajax({
-                    url: '@Url.Action("RemoveUserLink", "Settings")',
-                    type: 'POST',
-                    data: { id: id },
-                    success: function (response) {
-                        if (response.isSuccess) {
-                            $row.remove();
-                            updateRowsNumeration();
-                        } else {
-                            console.error(response.message);
-                            alert("Wystąpił błąd podczas usuwania linku.");
-                        }
-                    },
-                    error: function (xhr) {
-                        console.error(xhr.responseText);
-                        alert("Wystąpił błąd podczas usuwania linku.");
-                    }
-                });
-            }
-        }
-
-        function isValidUrl(string) {
-            try {
-                new URL(string);
-                return true;
-            } catch (_) {
-                return false;
-            }
-        }
-
-        function clearNewLinkInputs() {
-            $("#newLinkTitle").val("");
-            $("#newLinkUrl").val("");
-            $("#newLinkImage").val("");
-            $("#newHiddenImage").val("");
-
-            const imagePreview = $("#newImagePreview");
-            if (imagePreview) {
-                imagePreview.attr("src", "");
-                imagePreview.hide();
-            }
-
-            const noImageSpan = $("#newNoImageSpan");
-            if (noImageSpan) {
-                noImageSpan.show();
-            }
-
-            $("#newLinkTitleValidation").text("").hide();
-            $("#newLinkUrlValidation").text("").hide();
-            $("#newLinkImageValidation").text("").hide();
-        }
-
-        function updateRowsNumeration() {
-
-            $("#userLinksTable tbody tr").each(function (index, row) {
-                $(row).find("td:first").text(index + 1);+
-                $(row).find("input, td, img, button, span").each(function () {
-                                                  const input = $(this);
-                                                  const nameAttr = input.attr("name");
-                                                  const idAttr = input.attr("id");
-
-                                                  if (nameAttr) {
-                                                      input.attr("name", nameAttr.replace("Index", index));
-                                                  }
-
-                                                  if (idAttr) {
-                                                      input.attr("id", idAttr.replace("Index", index));
-                                                  }
-                                              });
-            });
-        }
-
-        function previewImage(input) {
-            const $row = $(input).closest("tr");
-            const imagePreview = $row.find("img");
-            const noImageSpan = $row.find(".text-muted"); 
-            const hiddenImageInput = $row.find("input[type='hidden'][name*=ImageBase64]"); 
-            const imageButton = $row.find("button.btn-primary"); 
-
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-
-                reader.onload = function (e) {           
-                    if (imagePreview) {
-                        imagePreview.attr("src", e.target.result).show(); 
-                    }
-
-                    if (noImageSpan) {
-                        noImageSpan.hide();
-                    }
-
-                    if (hiddenImageInput) {
-                        hiddenImageInput.val(e.target.result); 
-                    }
-             
-                    if (imageButton) {
-                        imageButton.text("Zmień obrazek");
-                    }
-                };
-
-                reader.readAsDataURL(input.files[0]); 
-            }
-        }
-
-        function removeImage(button) {
-            const $row = $(button).closest("tr"); 
-            const imagePreview = $row.find("img"); 
-            const noImageSpan = $row.find(".text-muted"); 
-            const hiddenImageInput = $row.find("input[type='hidden'][name*=ImageBase64]"); 
-            const fileInput = $row.find("input[type='file']").get(0); 
-            const imageButton = $row.find("button.btn-primary"); 
-
-            if (imagePreview) {
-                imagePreview.hide(); 
-                imagePreview.attr("src", ""); 
-            }
-
-            if (noImageSpan) {
-                noImageSpan.show();
-            }
-
-            if (hiddenImageInput) {
-                hiddenImageInput.val("");
-            }
-
-            if (fileInput) {
-                fileInput.value = ""; 
-            }
-
-            if (imageButton) {
-                imageButton.text("Dodaj obrazek"); 
-            }
-        }
-        function changeImage(button) {
-            const $row = $(button).closest("tr");
-            const fileInput = $row.find("input[type='file']").get(0); 
-
-            if (fileInput) {
-                fileInput.click();
-            }
-        }
-
-        function triggerFileInput(inputId) {
-            const fileInput = document.getElementById(inputId);
-            if (fileInput) {
-                fileInput.click();
-            }
-        }
-
-        function previewNewImage(input) {
-            const imagePreview = document.getElementById("newImagePreview");
-            const noImageSpan = document.getElementById("newNoImageSpan");
-            const hiddenImageInput = document.getElementById("newHiddenImage");
-
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-
-                reader.onload = function (e) {
-                    if (imagePreview) {
-                        imagePreview.src = e.target.result; // Set the preview image
-                        imagePreview.style.display = "inline"; // Show the preview
-                    }
-
-                    if (noImageSpan) {
-                        noImageSpan.style.display = "none"; // Hide the "No Image" span
-                    }
-
-                    if (hiddenImageInput) {
-                        hiddenImageInput.value = e.target.result.split(",")[1]; // Store the Base64 string
-                    }
-                };
-
-                reader.readAsDataURL(input.files[0]); // Read the file as Base64
-            }
-        }
-
-        function removeNewImage() {
-            const imagePreview = document.getElementById("newImagePreview");
-            const noImageSpan = document.getElementById("newNoImageSpan");
-            const hiddenImageInput = document.getElementById("newHiddenImage");
-            const fileInput = document.getElementById("newLinkImage");
-
-            if (imagePreview) {
-                imagePreview.src = ""; // Clear the image source
-                imagePreview.style.display = "none"; // Hide the preview
-            }
-
-            if (noImageSpan) {
-                noImageSpan.style.display = "inline"; // Show the "No Image" span
-            }
-
-            if (hiddenImageInput) {
-                hiddenImageInput.value = ""; // Clear the hidden input
-            }
-
-            if (fileInput) {
-                fileInput.value = ""; // Reset the file input
-            }
-        }
-
-
-    </script>
+    <script src="~/js/settings-my-links.js" asp-append-version="true"></script>
 }

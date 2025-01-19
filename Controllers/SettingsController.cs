@@ -88,7 +88,7 @@ public class SettingsController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddUserLink([FromForm] UserLinkDto newLinkDto, IFormFile image)
+    public async Task<IActionResult> AddUserLink([FromForm] UserLinkDto newLinkDto, IFormFile? image)
     {
 
         if (!ModelState.IsValid)
@@ -117,6 +117,27 @@ public class SettingsController : Controller
         {
             IsSuccess = true,
             Data = await _viewRenderService.RenderToStringAsync("_UserLinkRow", newLink)
+        };
+
+        return Json(response);
+    }
+
+    [HttpPost]
+    public IActionResult SaveUserLink([FromForm] UserLinkDto updatedLinkDto, IFormFile? image)
+    {
+
+        if (!ModelState.IsValid)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Invalid input data."
+            });
+        }
+
+        var response = new ResponseDto
+        {
+            IsSuccess = true
         };
 
         return Json(response);
