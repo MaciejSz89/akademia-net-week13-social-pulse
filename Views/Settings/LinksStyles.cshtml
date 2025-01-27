@@ -1,0 +1,71 @@
+﻿@model List<string>
+
+<h2>Wybierz Styl Linka</h2>
+
+<div id="currentStyleContainer" class="my-3">
+    <h4>Obecny styl:</h4>
+    <button id="currentStyleButton" class="btn btn-lg btn-secondary m-2">Styl nie wybrany</button>
+</div>
+
+<div class="button-container d-flex flex-wrap">
+    @foreach (var style in Model)
+    {
+        <div>
+            <button name="userLinkStyle"
+                    value="@style"
+                    class="btn btn-lg m-2 @style"
+                    data-style="@style"
+                    onclick="selectStyle(this)">
+                Wybierz
+            </button>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function selectStyle(button) {
+            const selectedStyle = $(button).data('style');
+
+            const formData = new FormData();
+            formData.append("userLinkStyle", selectedStyle);
+
+            $.ajax({
+                url: '/Settings/SaveStyle',
+                method: 'POST',
+                processData: false,
+                contentType: false,
+                data: formData,
+                success: function (response) {
+                    if (!response.isSuccess) {
+                        console.error(response.message);
+                        alert("Coś poszło nie tak.");
+                        return;
+                    }
+
+                    const currentStyleButton = $('#currentStyleButton');
+                    currentStyleButton.attr('class', `btn btn-lg ${response.data}`);
+                    currentStyleButton.text('Aktualny Styl');
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error saving style:', error);
+                    alert('Wystąpił błąd podczas zapisywania stylu.');
+                }
+            });
+        }
+
+    </script>
+}
+
+<style>
+    .button-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #currentStyleContainer {
+        margin-bottom: 20px;
+    }
+</style>

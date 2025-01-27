@@ -17,6 +17,11 @@ public class SocialPulseContext : IdentityDbContext<SocialPulseUser>
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        builder.Entity<SocialProfile>()
+               .HasOne(sp => sp.UserLinkStyle)
+               .WithOne(uls => uls.SocialProfile)
+               .HasForeignKey<UserLinkStyle>(uls => uls.SocialProfileId);
+
         base.OnModelCreating(builder);
     }
 
@@ -24,4 +29,5 @@ public class SocialPulseContext : IdentityDbContext<SocialPulseUser>
     public DbSet<SocialLink> SocialLinks { get; set; }
     public DbSet<SocialNetwork> SocialNetworks { get; set; }
     public DbSet<SocialProfile> SocialProfiles { get; set; }
+    public DbSet<UserLinkStyle> UserLinkStyles { get; set; }
 }
