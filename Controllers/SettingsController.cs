@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialPulse.Core.Dtos;
+using SocialPulse.Core.Models;
 using SocialPulse.Core.Services;
 using SocialPulse.Core.ViewModels;
 using System.Security.Claims;
@@ -72,11 +73,23 @@ public class SettingsController : Controller
 
     public IActionResult LinksStyles()
     {
-        var userLinkStyles = _userLinkStyleService.GetUserLinkStyles();
-        return View(userLinkStyles);
+        var vm = new UserLinkStyleViewModel
+        {
+            SocialProfile = new SocialProfile
+            {
+                UserLinkStyle = "btn-secondary",
+                SocialPulseUser = new Areas.Identity.Data.SocialPulseUser
+                {
+                    UserName = "User1"
+                }
+            },
+            UserLinkStyles = _userLinkStyleService.GetUserLinkStyles()
+        };
+        return View(vm);
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult SaveStyle(string userLinkStyle)
     {
         return Json(new ResponseDto<string>

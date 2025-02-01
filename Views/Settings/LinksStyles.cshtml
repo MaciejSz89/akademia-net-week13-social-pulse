@@ -1,34 +1,49 @@
-﻿@model List<string>
+﻿@using SocialPulse.Core.ViewModels
+@model UserLinkStyleViewModel
+
+@{
+    ViewData["Title"] = "Wybór stylu linków użytkownika " + Model.SocialProfile.SocialPulseUser!.UserName;
+}
 
 <h2>Wybierz Styl Linka</h2>
 
-<div id="currentStyleContainer" class="my-3">
-    <h4>Obecny styl:</h4>
-    <button id="currentStyleButton" class="btn btn-lg btn-secondary m-2">Styl nie wybrany</button>
+<div id="currentStyleContainer" class="mt-3 mb-20">
+    <button id="currentStyleButton" class="btn btn-lg m-2 @Model.SocialProfile.UserLinkStyle">Aktualny Styl</button>
 </div>
 
-<div class="button-container d-flex flex-wrap">
-    @foreach (var style in Model)
-    {
-        <div>
-            <button name="userLinkStyle"
-                    value="@style"
-                    class="btn btn-lg m-2 @style"
-                    data-style="@style"
-                    onclick="selectStyle(this)">
-                Wybierz
-            </button>
-        </div>
-    }
-</div>
+@using (Html.BeginForm("SaveStyle", "Settings", FormMethod.Post, new { id = "styleForm" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="button-container d-flex flex-wrap">
+        @foreach (var style in Model.UserLinkStyles)
+        {
+            <div>
+                <button name="userLinkStyle"
+                        value="@style"
+                        class="btn btn-lg m-2 @style"
+                        data-style="@style"
+                        type="button"
+                        onclick="selectStyle(this)">
+                    Wybierz
+                </button>
+            </div>
+        }
+    </div>
+}
 
 @section Scripts {
     <script>
+        
         function selectStyle(button) {
             const selectedStyle = $(button).data('style');
 
+            const form = $('#styleForm');
+
+            const token = form.find('input[name="__RequestVerificationToken"]').val();
+
             const formData = new FormData();
             formData.append("userLinkStyle", selectedStyle);
+            formData.append("__RequestVerificationToken", token);
 
             $.ajax({
                 url: '/Settings/SaveStyle',
@@ -44,7 +59,7 @@
                     }
 
                     const currentStyleButton = $('#currentStyleButton');
-                    currentStyleButton.attr('class', `btn btn-lg ${response.data}`);
+                    currentStyleButton.attr('class', `btn btn-lg m-2 ${response.data}`);
                     currentStyleButton.text('Aktualny Styl');
 
                 },
@@ -58,14 +73,3 @@
     </script>
 }
 
-<style>
-    .button-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    #currentStyleContainer {
-        margin-bottom: 20px;
-    }
-</style>
