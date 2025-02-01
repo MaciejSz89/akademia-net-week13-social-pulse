@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocialPulse.Persistence;
 
@@ -11,9 +12,11 @@ using SocialPulse.Persistence;
 namespace SocialPulse.Migrations
 {
     [DbContext(typeof(SocialPulseContext))]
-    partial class SocialPulseContextModelSnapshot : ModelSnapshot
+    [Migration("20250127211810_UserLinksTableAdded")]
+    partial class UserLinksTableAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -299,9 +302,8 @@ namespace SocialPulse.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UserLinkStyle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("UserLinkStyleId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -337,6 +339,29 @@ namespace SocialPulse.Migrations
                     b.HasIndex("SocialProfileId");
 
                     b.ToTable("UserLinks");
+                });
+
+            modelBuilder.Entity("SocialPulse.Core.Models.UserLinkStyle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("SocialProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Style")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SocialProfileId")
+                        .IsUnique();
+
+                    b.ToTable("UserLinkStyles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -431,9 +456,22 @@ namespace SocialPulse.Migrations
                     b.Navigation("SocialProfile");
                 });
 
+            modelBuilder.Entity("SocialPulse.Core.Models.UserLinkStyle", b =>
+                {
+                    b.HasOne("SocialPulse.Core.Models.SocialProfile", "SocialProfile")
+                        .WithOne("UserLinkStyle")
+                        .HasForeignKey("SocialPulse.Core.Models.UserLinkStyle", "SocialProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SocialProfile");
+                });
+
             modelBuilder.Entity("SocialPulse.Core.Models.SocialProfile", b =>
                 {
                     b.Navigation("SocialLinks");
+
+                    b.Navigation("UserLinkStyle");
 
                     b.Navigation("UserLinks");
                 });

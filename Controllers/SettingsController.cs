@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SocialPulse.Core.Dtos;
+using SocialPulse.Core.Models;
 using SocialPulse.Core.Services;
 using SocialPulse.Core.ViewModels;
+using System.Security.Claims;
 
 namespace SocialPulse.Controllers;
 
@@ -11,12 +14,14 @@ public class SettingsController : Controller
     private readonly ISocialNetworkService _socialNetworkService;
     private readonly IMapper _mapper;
     private readonly IViewRenderService _viewRenderService;
+    private readonly IUserLinkStyleService _userLinkStyleService;
 
     public SettingsController(IServiceProvider serviceProvider)
     {
         _socialNetworkService = serviceProvider.GetRequiredService<ISocialNetworkService>();
         _mapper = serviceProvider.GetRequiredService<IMapper>();
         _viewRenderService = serviceProvider.GetRequiredService<IViewRenderService>();
+        _userLinkStyleService = serviceProvider.GetRequiredService<IUserLinkStyleService>();
     }
 
     public async Task<IActionResult> Profile()
@@ -66,10 +71,37 @@ public class SettingsController : Controller
         return View(model);
     }
 
+    public IActionResult LinksStyles()
+    {
+        var vm = new UserLinkStyleViewModel
+        {
+            SocialProfile = new SocialProfile
+            {
+                UserLinkStyle = "btn-secondary",
+                SocialPulseUser = new Areas.Identity.Data.SocialPulseUser
+                {
+                    UserName = "User1"
+                }
+            },
+            UserLinkStyles = _userLinkStyleService.GetUserLinkStyles()
+        };
+        return View(vm);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult SaveStyle(string userLinkStyle)
+    {
+        return Json(new ResponseDto<string>
+        {
+            IsSuccess = true,
+            Data = userLinkStyle
+        });
+    }
+
     [HttpPost]
     public IActionResult RemoveUserLink(int Id)
     {
-
         if (!ModelState.IsValid)
         {
             return Json(new ResponseDto
