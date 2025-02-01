@@ -35,6 +35,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>()
                 .AddScoped<ISocialNetworkService, SocialNetworkService>()
                 .AddScoped<IUserLinkStyleService, UserLinkStyleService>()
+                .AddScoped<ISocialProfileService, SocialProfileService>()
                 .AddScoped<IUnitOfWork, UnitOfWork>()
                 .AddScoped<IViewRenderService, ViewRenderService>()
                 .AddHttpContextAccessor(); 

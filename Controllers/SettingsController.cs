@@ -11,14 +11,14 @@ namespace SocialPulse.Controllers;
 
 public class SettingsController : Controller
 {
-    private readonly ISocialNetworkService _socialNetworkService;
+    private readonly ISocialProfileService _socialProfileService;
     private readonly IMapper _mapper;
     private readonly IViewRenderService _viewRenderService;
     private readonly IUserLinkStyleService _userLinkStyleService;
 
     public SettingsController(IServiceProvider serviceProvider)
     {
-        _socialNetworkService = serviceProvider.GetRequiredService<ISocialNetworkService>();
+        _socialProfileService = serviceProvider.GetRequiredService<ISocialProfileService>();
         _mapper = serviceProvider.GetRequiredService<IMapper>();
         _viewRenderService = serviceProvider.GetRequiredService<IViewRenderService>();
         _userLinkStyleService = serviceProvider.GetRequiredService<IUserLinkStyleService>();
@@ -26,26 +26,48 @@ public class SettingsController : Controller
 
     public async Task<IActionResult> Profile()
     {
-        var socialNetworks = _mapper.Map<List<SocialNetworkViewModel>>(await _socialNetworkService.GetAsync());
-        List<SocialLinkViewModel> links = new List<SocialLinkViewModel>();
+        var vm = await _socialProfileService.CreateSocialProfileViewModelAsync(User);
 
-        foreach (var socialNetwork in socialNetworks)
-        {
-            links.Add(new SocialLinkViewModel
-            {
-                SocialNetwork = socialNetwork,
-            });
-        }
-
-        var vm = new SocialProfileViewModel
-        {
-            Email = "test@test.com",
-            UserName = "user",
-            SocialLinks = links
-        };
+        if (vm == null) 
+            return NotFound();
 
         return View(vm);
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult SaveProfile(SocialProfileDto socialProfile)
+    {
+
+        if (!ModelState.IsValid)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak"
+            });
+        }
+
+        try
+        {
+
+        }
+        catch (Exception)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak"
+            });
+        }
+
+        return Json(new ResponseDto
+        {
+            IsSuccess = true
+        });
+    }
+
+
     public IActionResult MyLinks()
     {
         var model = new SocialProfileViewModel

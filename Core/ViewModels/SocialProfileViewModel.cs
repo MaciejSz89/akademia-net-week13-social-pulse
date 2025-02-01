@@ -1,7 +1,4 @@
-﻿using SocialPulse.Areas.Identity.Data;
-using SocialPulse.Core.Models;
-using System.ComponentModel.DataAnnotations;
-using System.Drawing;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SocialPulse.Core.ViewModels
 {
@@ -18,7 +15,7 @@ namespace SocialPulse.Core.ViewModels
         [Display(Name = "Opis")]
         [Required(ErrorMessage = "Pole Opis jest wymagane.")]
         public string Content { get; set; } = null!;
-        public byte[] ProfileImage
+        public byte[]? ProfileImage
         {
             get
             {
