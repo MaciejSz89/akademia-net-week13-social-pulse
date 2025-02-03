@@ -1,10 +1,10 @@
-﻿using SocialPulse.Core.ViewModels;
-using System.Security.Claims;
+﻿using SocialPulse.Core.Models;
 
 namespace SocialPulse.Core.Services
 {
     public interface ISocialProfileService
     {
-        Task<SocialProfileViewModel?> CreateSocialProfileViewModelAsync(ClaimsPrincipal user);
+        SocialProfile GetSocialProfileByUserId(string userId);
+        void UpdateSocialProfile(SocialProfile socialProfile);
     }
 }

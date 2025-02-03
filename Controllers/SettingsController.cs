@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialPulse.Core.Dtos;
@@ -12,6 +13,7 @@ namespace SocialPulse.Controllers;
 public class SettingsController : Controller
 {
     private readonly ISocialProfileService _socialProfileService;
+    private readonly ISocialNetworkService _socialNetworkService;
     private readonly IMapper _mapper;
     private readonly IViewRenderService _viewRenderService;
     private readonly IUserLinkStyleService _userLinkStyleService;
@@ -19,6 +21,7 @@ public class SettingsController : Controller
     public SettingsController(IServiceProvider serviceProvider)
     {
         _socialProfileService = serviceProvider.GetRequiredService<ISocialProfileService>();
+        _socialNetworkService = serviceProvider.GetRequiredService<ISocialNetworkService>();
         _mapper = serviceProvider.GetRequiredService<IMapper>();
         _viewRenderService = serviceProvider.GetRequiredService<IViewRenderService>();
         _userLinkStyleService = serviceProvider.GetRequiredService<IUserLinkStyleService>();
@@ -26,17 +29,18 @@ public class SettingsController : Controller
 
     public async Task<IActionResult> Profile()
     {
-        var vm = await _socialProfileService.CreateSocialProfileViewModelAsync(User);
+        var vm = await CreateSocialProfileViewModelAsync();
 
-        if (vm == null) 
+        if (vm == null)
             return NotFound();
 
         return View(vm);
     }
 
+
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult SaveProfile(SocialProfileDto socialProfile)
+    public IActionResult SaveProfile(SocialProfileDto socialProfileDto)
     {
 
         if (!ModelState.IsValid)
@@ -50,7 +54,8 @@ public class SettingsController : Controller
 
         try
         {
-
+            var socialProfile = _mapper.Map<SocialProfile>(socialProfileDto);
+            _socialProfileService.UpdateSocialProfile(socialProfile);
         }
         catch (Exception)
         {
@@ -75,15 +80,15 @@ public class SettingsController : Controller
             UserName = "John Doe",
             UserLinks = new List<UserLinkViewModel>
                         {
-                            new UserLinkViewModel { 
-                                                    Id = 1, 
-                                                    Title = "Facebook", 
-                                                    Url = "https://facebook.com/johndoe", 
-                                                    Image = GetSampleImage("facebook.png") 
+                            new UserLinkViewModel {
+                                                    Id = 1,
+                                                    Title = "Facebook",
+                                                    Url = "https://facebook.com/johndoe",
+                                                    Image = GetSampleImage("facebook.png")
                                                   },
-                            new UserLinkViewModel { 
-                                                    Id = 2, 
-                                                    Title = "X", 
+                            new UserLinkViewModel {
+                                                    Id = 2,
+                                                    Title = "X",
                                                     Url = "https://x.com/johndoe" ,
                                                     Image = GetSampleImage("x.png")
                                                   }
@@ -208,4 +213,40 @@ public class SettingsController : Controller
         var imageBytes = System.IO.File.ReadAllBytes(filePath);
         return imageBytes;
     }
+
+    private async Task<SocialProfileViewModel?> CreateSocialProfileViewModelAsync()
+    {
+        var socialNetworks = _mapper.Map<List<SocialNetworkViewModel>>(await _socialNetworkService.GetAsync());
+        List<SocialLinkViewModel> links = new List<SocialLinkViewModel>();
+
+        foreach (var socialNetwork in socialNetworks)
+        {
+            links.Add(new SocialLinkViewModel
+            {
+                SocialNetworkId = socialNetwork.Id,
+                SocialNetwork = socialNetwork,
+            });
+        }
+
+        var userName = User.Identity?.Name;
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+
+        if (email == null || userName == null || userId == null)
+            return null;
+
+        var socialProfile = _socialProfileService.GetSocialProfileByUserId(userId);
+
+        var vm = new SocialProfileViewModel
+        {
+            Email = email,
+            UserName = userName,
+            SocialLinks = links
+        };
+
+        return vm;
+
+    }
+
 }

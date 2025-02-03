@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using SocialPulse.Core;
+using SocialPulse.Core.Models;
 using SocialPulse.Core.Services;
 using SocialPulse.Core.ViewModels;
 using System.Security.Claims;
@@ -9,40 +11,23 @@ namespace SocialPulse.Persistence.Services
     {
         private readonly ISocialNetworkService _socialNetworkService;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
         public SocialProfileService(IServiceProvider serviceProvider)
         {
             _socialNetworkService = serviceProvider.GetRequiredService<ISocialNetworkService>();
             _mapper = serviceProvider.GetRequiredService<IMapper>();
+            _unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
         }
-        public async Task<SocialProfileViewModel?> CreateSocialProfileViewModelAsync(ClaimsPrincipal user)
+
+        public SocialProfile GetSocialProfileByUserId(string userId)
         {
-            var socialNetworks = _mapper.Map<List<SocialNetworkViewModel>>(await _socialNetworkService.GetAsync());
-            List<SocialLinkViewModel> links = new List<SocialLinkViewModel>();
+            return _unitOfWork.SocialProfileRepository.GetByUserId(userId);
+        }
 
-            foreach (var socialNetwork in socialNetworks)
-            {
-                links.Add(new SocialLinkViewModel
-                {
-                    SocialNetworkId = socialNetwork.Id,
-                    SocialNetwork = socialNetwork,
-                });
-            }
-
-            var userName = user.Identity?.Name;
-            var email = user.FindFirstValue(ClaimTypes.Email);
-
-            if (email == null || userName == null)
-                return null;
-
-            var vm = new SocialProfileViewModel
-            {
-                Email = email,
-                UserName = userName,
-                SocialLinks = links
-            };
-
-            return vm;
+        public void UpdateSocialProfile(SocialProfile socialProfile)
+        {
+            throw new NotImplementedException();
         }
     }
 }
