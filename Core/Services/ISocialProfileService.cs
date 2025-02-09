@@ -4,7 +4,7 @@ namespace SocialPulse.Core.Services
 {
     public interface ISocialProfileService
     {
-        SocialProfile GetSocialProfileByUserId(string userId);
-        void UpdateSocialProfile(SocialProfile socialProfile);
+        Task<SocialProfile> GetByUserIdAsync(string userId);
+        Task UpdateAsync(SocialProfile socialProfile);
     }
 }

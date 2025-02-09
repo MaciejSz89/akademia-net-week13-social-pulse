@@ -45,38 +45,7 @@ namespace SocialPulse.Persistence.Repositories
 
             _context.SocialNetworks.Remove(networkToDelete);
         }
-
-        public IEnumerable<SocialNetwork> Get()
-        {
-            return _context.SocialNetworks.ToList();
-        }
-
-        public SocialNetwork? Get(int id)
-        {
-            return _context.SocialNetworks.SingleOrDefault(x => x.Id == id);
-        }
-
-        public void Add(SocialNetwork network)
-        {
-            var newNetwork = _context.SocialNetworks.Add(network);
-        }
-
-        public void Update(SocialNetwork network)
-        {
-            var networkToUpdate = _context.SocialNetworks.Single(x => x.Id == network.Id);
-            if (networkToUpdate == null) throw new NullReferenceException("Social Network not found in database");
-
-            CopyNetworkMembers(network, networkToUpdate);
-        }
-
-        public void Delete(int id)
-        {
-            var networkToDelete = Get(id);
-            if (networkToDelete == null) throw new NullReferenceException("Social Network not found in database");
-
-            _context.SocialNetworks.Remove(networkToDelete);
-        }
-
+     
         private static void CopyNetworkMembers(SocialNetwork source, SocialNetwork destination)
         {
             destination.Name = source.Name;

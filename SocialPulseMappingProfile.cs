@@ -2,6 +2,7 @@
 using SocialPulse.Core.Dtos;
 using SocialPulse.Core.Models;
 using SocialPulse.Core.ViewModels;
+using SocialPulse.Helpers;
 
 namespace SocialPulse
 {
@@ -11,6 +12,18 @@ namespace SocialPulse
         {
             CreateMap<SocialProfile, SocialProfileViewModel>();
             CreateMap<SocialProfileViewModel, SocialProfile>();
+            CreateMap<SocialProfileDto, SocialProfile>()
+                        .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src =>
+                            src.ProfileImage != null
+                                ? src.ProfileImage.ToByteArray()
+                                : Array.Empty<byte>() 
+                        ))
+                        .ForMember(dest => dest.SocialLinks, opt => opt.MapFrom(src =>
+                            src.SocialLinks
+                                .Where(link => !string.IsNullOrWhiteSpace(link.RemainingUrl))
+                        ));
+
+            CreateMap<SocialLinkDto, SocialLink>();
             CreateMap<SocialLink, SocialLinkViewModel>();
             CreateMap<SocialLinkViewModel, SocialLink>();
             CreateMap<SocialNetwork, SocialNetworkViewModel>();

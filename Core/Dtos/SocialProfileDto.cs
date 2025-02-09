@@ -13,7 +13,7 @@ namespace SocialPulse.Core.Dtos
         [EmailAddress]
         public string Email { get; set; } = null!;
 
-        public string? Content { get; set; }
+        public string Content { get; set; } = null!;
 
         public List<SocialLinkDto> SocialLinks { get; set; } = new List<SocialLinkDto>();
     }

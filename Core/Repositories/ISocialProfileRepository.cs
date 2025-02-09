@@ -2,9 +2,11 @@
 
 namespace SocialPulse.Core.Repositories
 {
-    public interface ISocialProfileRepository : IRepository<SocialProfile, int>
+    public interface ISocialProfileRepository
     {
-        SocialProfile GetByUserId(string userId);
+        Task<IEnumerable<SocialProfile>> GetAsync();
+        Task<SocialProfile?> GetAsync(int id);
         Task<SocialProfile> GetByUserIdAsync(string userId);
+        Task UpdateAsync(SocialProfile socialProfile);
     }
 }

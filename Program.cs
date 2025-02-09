@@ -33,6 +33,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>()
+                .AddScoped<ISocialProfileRepository, SocialProfileRepository>()
                 .AddScoped<ISocialNetworkService, SocialNetworkService>()
                 .AddScoped<IUserLinkStyleService, UserLinkStyleService>()
                 .AddScoped<ISocialProfileService, SocialProfileService>()

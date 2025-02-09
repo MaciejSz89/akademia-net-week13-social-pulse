@@ -13,36 +13,6 @@ namespace SocialPulse.Persistence.Repositories
             _context = serviceProvider.GetRequiredService<SocialPulseContext>();
         }
 
-        public void Add(SocialProfile entity)
-        {
-
-        }
-
-        public async Task AddAsync(SocialProfile socialProfile)
-        {
-            var newNetwork = await _context.SocialProfiles.AddAsync(socialProfile);
-        }
-
-        public void Delete(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<SocialProfile> Get()
-        {
-            throw new NotImplementedException();
-        }
-
-        public SocialProfile? Get(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<IEnumerable<SocialProfile>> GetAsync()
         {
             return await _context.SocialProfiles.ToListAsync();
@@ -53,34 +23,55 @@ namespace SocialPulse.Persistence.Repositories
             return await _context.SocialProfiles.SingleOrDefaultAsync(x => x.Id == id);
         }
 
-        public void Update(SocialProfile entity)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task UpdateAsync(SocialProfile socialProfile)
         {
             var socialProfileToUpdate = await _context.SocialProfiles
                                                       .Include(x => x.SocialLinks)
-                                                      .SingleAsync(x => x.Id == socialProfile.Id);
-            if (socialProfileToUpdate == null) throw new NullReferenceException("Social Profile not found in database");
+                                                      .SingleAsync(x => x.Id == socialProfile.Id);                     
 
             CopySocialProfileMembers(socialProfile, socialProfileToUpdate);
         }
 
         private static void CopySocialProfileMembers(SocialProfile source, SocialProfile destination)
         {
-            destination.ProfileImage = source.ProfileImage;
-            destination.UserLinkStyle = source.UserLinkStyle;
+            destination.Content = source.Content;
+            if(source.ProfileImage.Length != 0)
+                destination.ProfileImage = source.ProfileImage;
+
+            var socialLinksToRemove = destination.SocialLinks
+                                                 .Where(x => !source.SocialLinks
+                                                                    .Select(y => y.SocialNetworkId)
+                                                                    .Contains(x.SocialNetworkId))
+                                                 .ToList();
+
+            var socialLinksToUpdate = destination.SocialLinks
+                                                 .Where(x => source.SocialLinks
+                                                                   .Select(y => y.SocialNetworkId)
+                                                                   .Contains(x.SocialNetworkId))
+                                                 .ToList();
+
+            var socialLinksToAdd = source.SocialLinks
+                                         .Where(x => !destination.SocialLinks
+                                                                 .Select(y => y.SocialNetworkId)
+                                                                 .Contains(x.SocialNetworkId))
+                                         .ToList();
+
+            socialLinksToRemove.ForEach(x => destination.SocialLinks
+                                                                  .Remove(x));
+
+            socialLinksToUpdate.ForEach(x => destination.SocialLinks
+                                                        .Single(y => y.SocialNetworkId == x.SocialNetworkId)
+                                                        .RemainingUrl = x.RemainingUrl);
+
+            socialLinksToAdd.ForEach(destination.SocialLinks
+                                                .Add);
         }
 
-        public SocialProfile GetByUserId(string userId)
-        {
-            return _context.SocialProfiles.Single(x => x.SocialPulseUserId == userId);
-        }
         public async Task<SocialProfile> GetByUserIdAsync(string userId)
         {
-            return await _context.SocialProfiles.SingleAsync(x => x.SocialPulseUserId == userId);
+            return await _context.SocialProfiles
+                                 .Include(x => x.SocialLinks)
+                                 .SingleAsync(x => x.SocialPulseUserId == userId);
         }
     }
 }

@@ -40,7 +40,7 @@ public class SettingsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult SaveProfile(SocialProfileDto socialProfileDto)
+    public async Task<IActionResult> SaveProfile(SocialProfileDto socialProfileDto)
     {
 
         if (!ModelState.IsValid)
@@ -55,7 +55,7 @@ public class SettingsController : Controller
         try
         {
             var socialProfile = _mapper.Map<SocialProfile>(socialProfileDto);
-            _socialProfileService.UpdateSocialProfile(socialProfile);
+            await _socialProfileService.UpdateAsync(socialProfile);
         }
         catch (Exception)
         {
@@ -217,16 +217,6 @@ public class SettingsController : Controller
     private async Task<SocialProfileViewModel?> CreateSocialProfileViewModelAsync()
     {
         var socialNetworks = _mapper.Map<List<SocialNetworkViewModel>>(await _socialNetworkService.GetAsync());
-        List<SocialLinkViewModel> links = new List<SocialLinkViewModel>();
-
-        foreach (var socialNetwork in socialNetworks)
-        {
-            links.Add(new SocialLinkViewModel
-            {
-                SocialNetworkId = socialNetwork.Id,
-                SocialNetwork = socialNetwork,
-            });
-        }
 
         var userName = User.Identity?.Name;
         var email = User.FindFirstValue(ClaimTypes.Email);
@@ -236,13 +226,32 @@ public class SettingsController : Controller
         if (email == null || userName == null || userId == null)
             return null;
 
-        var socialProfile = _socialProfileService.GetSocialProfileByUserId(userId);
+        var socialProfile = await _socialProfileService.GetByUserIdAsync(userId);
+
+        List<SocialLinkViewModel> links = new List<SocialLinkViewModel>();
+
+        foreach (var socialNetwork in socialNetworks)
+        {
+            var socialLink = new SocialLinkViewModel
+            {
+                SocialNetworkId = socialNetwork.Id,
+                SocialNetwork = socialNetwork,
+                RemainingUrl = socialProfile.SocialLinks
+                                            .SingleOrDefault(x => x.SocialNetworkId == socialNetwork.Id)?
+                                            .RemainingUrl
+            };
+
+            links.Add(socialLink);
+        }
 
         var vm = new SocialProfileViewModel
         {
+            Id = socialProfile.Id,
             Email = email,
             UserName = userName,
-            SocialLinks = links
+            SocialLinks = links,
+            ProfileImage = socialProfile.ProfileImage,
+            Content = socialProfile.Content            
         };
 
         return vm;

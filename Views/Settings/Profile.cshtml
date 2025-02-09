@@ -72,7 +72,7 @@
                               class="text-danger" />
                     </div>
 
-                    <h4>Social links</h4>
+                    <h4>Linki społecznościowe</h4>
                     <table class="table align-middle">
                         @for (var i = 0; i < Model.SocialLinks.Count; i++)
                         {
@@ -133,7 +133,12 @@
         });
 
         $("#profileForm").submit(function (event) {
-            event.preventDefault(); 
+            event.preventDefault();
+            
+            if (!$(this).valid()) {            
+                return;
+            }
+
 
             const formData = new FormData(this);
 

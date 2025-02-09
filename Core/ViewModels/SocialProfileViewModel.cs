@@ -14,9 +14,10 @@ namespace SocialPulse.Core.ViewModels
         [Display(Name = "Opis")]
         [Required(ErrorMessage = "Pole Opis jest wymagane.")]
         public string Content { get; set; } = null!;
-        public byte[] ProfileImage { get; set; } = null!;
+        public byte[]? ProfileImage { get; set; } = null!;
 
-        public string ProfileImageBase64 => $"data:image/jpeg;base64,{Convert.ToBase64String(ProfileImage)}";
+        public string ProfileImageBase64 => ProfileImage != null ? $"data:image/jpeg;base64,{Convert.ToBase64String(ProfileImage)}" 
+                                                                 : "";
         public List<UserLinkViewModel> UserLinks { get; set; } = new List<UserLinkViewModel>();
         public List<SocialLinkViewModel> SocialLinks { get; set; } = new List<SocialLinkViewModel>();
 

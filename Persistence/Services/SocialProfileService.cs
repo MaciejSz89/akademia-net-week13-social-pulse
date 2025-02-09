@@ -20,14 +20,16 @@ namespace SocialPulse.Persistence.Services
             _unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
         }
 
-        public SocialProfile GetSocialProfileByUserId(string userId)
+        public async Task<SocialProfile> GetByUserIdAsync(string userId)
         {
-            return _unitOfWork.SocialProfileRepository.GetByUserId(userId);
+            return await _unitOfWork.SocialProfileRepository.GetByUserIdAsync(userId);
         }
 
-        public void UpdateSocialProfile(SocialProfile socialProfile)
+        public async Task UpdateAsync(SocialProfile socialProfile)
         {
-            throw new NotImplementedException();
+            await _unitOfWork.SocialProfileRepository.UpdateAsync(socialProfile);
+
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }
