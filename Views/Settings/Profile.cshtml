@@ -150,7 +150,12 @@
                 processData: false,
                 success: function (result) {
                     if (result.isSuccess) {
+                        document.title = "Ustawienia profilu " + result.data;
+
+                        $("form#profileForm h2").text(document.title);
+
                         alert("Profil został zapisany pomyślnie!");
+
                     } else {
                         alert("Wystąpił błąd przy zapisywaniu profilu: " + result.message);
                     }

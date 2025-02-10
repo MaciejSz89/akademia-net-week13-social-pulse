@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SocialPulse.Areas.Identity.Data;
 using SocialPulse.Core.Dtos;
 using SocialPulse.Core.Models;
 using SocialPulse.Core.Services;
@@ -17,14 +18,20 @@ public class SettingsController : Controller
     private readonly IMapper _mapper;
     private readonly IViewRenderService _viewRenderService;
     private readonly IUserLinkStyleService _userLinkStyleService;
+    private readonly SignInManager<SocialPulseUser> _signInManager;
+    private readonly UserManager<SocialPulseUser> _userManager;
 
-    public SettingsController(IServiceProvider serviceProvider)
+    public SettingsController(IServiceProvider serviceProvider, 
+                              SignInManager<SocialPulseUser> signInManager,
+                              UserManager<SocialPulseUser> userManager)
     {
         _socialProfileService = serviceProvider.GetRequiredService<ISocialProfileService>();
         _socialNetworkService = serviceProvider.GetRequiredService<ISocialNetworkService>();
         _mapper = serviceProvider.GetRequiredService<IMapper>();
         _viewRenderService = serviceProvider.GetRequiredService<IViewRenderService>();
         _userLinkStyleService = serviceProvider.GetRequiredService<IUserLinkStyleService>();
+        _signInManager = signInManager;
+        _userManager = userManager;
     }
 
     public async Task<IActionResult> Profile()
@@ -55,7 +62,30 @@ public class SettingsController : Controller
         try
         {
             var socialProfile = _mapper.Map<SocialProfile>(socialProfileDto);
-            await _socialProfileService.UpdateAsync(socialProfile);
+
+            var currentUserName = User.Identity?.Name;
+            var currentEmail = User.FindFirstValue(ClaimTypes.Email);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+                throw new NullReferenceException("User not found");
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                throw new NullReferenceException("User not found");
+
+            socialProfile.SocialPulseUserId = userId;
+
+            var newUserName = socialProfileDto.UserName != currentUserName ? socialProfileDto.UserName : null;
+            var newEmail = socialProfileDto.Email != currentEmail ? socialProfileDto.Email : null;
+
+            await _socialProfileService.UpdateSocialProfileAsync(socialProfile,
+                                                                 newUserName,
+                                                                 newEmail);
+
+            if (newUserName != null || newEmail != null)
+                await _signInManager.RefreshSignInAsync(user);
         }
         catch (Exception)
         {
@@ -66,9 +96,10 @@ public class SettingsController : Controller
             });
         }
 
-        return Json(new ResponseDto
+        return Json(new ResponseDto<string?>
         {
-            IsSuccess = true
+            IsSuccess = true,
+            Data = User.Identity?.Name
         });
     }
 
@@ -226,7 +257,7 @@ public class SettingsController : Controller
         if (email == null || userName == null || userId == null)
             return null;
 
-        var socialProfile = await _socialProfileService.GetByUserIdAsync(userId);
+        var socialProfile = await _socialProfileService.GetSocialProfileByUserIdAsync(userId);
 
         List<SocialLinkViewModel> links = new List<SocialLinkViewModel>();
 

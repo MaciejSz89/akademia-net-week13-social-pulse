@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
-using SocialPulse.Core;
+using Microsoft.AspNetCore.Identity;
 using SocialPulse.Core.Models;
+using SocialPulse.Core.Repositories;
 using SocialPulse.Core.Services;
 using SocialPulse.Core.ViewModels;
 using System.Security.Claims;
@@ -9,24 +10,34 @@ namespace SocialPulse.Persistence.Services
 {
     public class SocialProfileService : ISocialProfileService
     {
-        private readonly ISocialNetworkService _socialNetworkService;
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
         public SocialProfileService(IServiceProvider serviceProvider)
         {
-            _socialNetworkService = serviceProvider.GetRequiredService<ISocialNetworkService>();
-            _mapper = serviceProvider.GetRequiredService<IMapper>();
             _unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
         }
 
-        public async Task<SocialProfile> GetByUserIdAsync(string userId)
+        public async Task<SocialProfile> GetSocialProfileByUserIdAsync(string userId)
         {
             return await _unitOfWork.SocialProfileRepository.GetByUserIdAsync(userId);
         }
 
-        public async Task UpdateAsync(SocialProfile socialProfile)
+        public async Task UpdateSocialProfileAsync(SocialProfile socialProfile, string? newUserName, string? newEmail)
         {
+            if (newUserName != null)
+            {
+                var setUserNameResult = await _unitOfWork.IdentityUserRepository.SetUserNameAsync(socialProfile.SocialPulseUserId, newUserName);
+                if (!setUserNameResult.Succeeded)
+                    throw new Exception("SetUserNameAsync failed...");
+            }
+
+            if (newEmail != null)
+            {
+                var setEmailResult = await _unitOfWork.IdentityUserRepository.SetEmailAsync(socialProfile.SocialPulseUserId, newEmail);
+                if (!setEmailResult.Succeeded)
+                    throw new Exception("SetEmailAsync failed...");
+            }
+
             await _unitOfWork.SocialProfileRepository.UpdateAsync(socialProfile);
 
             await _unitOfWork.SaveChangesAsync();

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SocialPulse.Core;
 using SocialPulse.Core.Dtos;
 using SocialPulse.Core.Models;
 using SocialPulse.Core.Repositories;
