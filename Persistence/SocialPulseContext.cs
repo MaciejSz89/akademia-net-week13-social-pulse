@@ -18,6 +18,10 @@ public class SocialPulseContext : IdentityDbContext<SocialPulseUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<SocialNetwork>()
+               .Property(s => s.Id)
+               .ValueGeneratedNever();
     }
 
     public DbSet<UserLink> UserLinks { get; set; }

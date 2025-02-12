@@ -1,24 +1,29 @@
 ﻿using SocialPulse.Core.Repositories;
-using SocialPulse.Core;
-using SocialPulse.Persistence.Repositories;
 using System;
 
-namespace SocialPulse.Persistence
+namespace SocialPulse.Persistence.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly SocialPulseContext _context;
         private readonly ISocialNetworkRepository _socialNetworkRepository;
-        private readonly Dictionary<Type, object> _repositories = new();
+        private readonly ISocialProfileRepository _socialProfileRepository;
+        private readonly IIdentityUserRepository _identityUserRepository;
 
 
         public UnitOfWork(IServiceProvider serviceProvider)
         {
             _context = serviceProvider.GetRequiredService<SocialPulseContext>();
             _socialNetworkRepository = serviceProvider.GetRequiredService<ISocialNetworkRepository>();
+            _socialProfileRepository = serviceProvider.GetRequiredService<ISocialProfileRepository>();
+            _identityUserRepository = serviceProvider.GetRequiredService<IIdentityUserRepository>();
+
         }
         public ISocialNetworkRepository SocialNetworkRepository => _socialNetworkRepository;
 
+        public ISocialProfileRepository SocialProfileRepository => _socialProfileRepository;
+
+        public IIdentityUserRepository IdentityUserRepository => _identityUserRepository;
 
         public async Task<int> SaveChangesAsync()
         {

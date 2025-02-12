@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SocialPulse.Core;
 using SocialPulse.Core.Dtos;
 using SocialPulse.Core.Models;
 using SocialPulse.Core.Repositories;
@@ -28,7 +27,6 @@ namespace SocialPulse.Persistence.Services
                 }
                 else
                 {
-                    network.Id = 0;
                     await _unitOfWork.SocialNetworkRepository.AddAsync(network);
                 }
             }

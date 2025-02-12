@@ -9,7 +9,7 @@
     <div class="row">
         <div class="col-md-5">
             <section>
-                <form id="account" method="post">
+                <form id="profileForm" method="post" asp-controller="Settings" asp-action="SaveProfile">
                     <h2>@ViewData["Title"]</h2>
                     <hr />
 
@@ -72,7 +72,7 @@
                               class="text-danger" />
                     </div>
 
-                    <h4>Social links</h4>
+                    <h4>Linki społecznościowe</h4>
                     <table class="table align-middle">
                         @for (var i = 0; i < Model.SocialLinks.Count; i++)
                         {
@@ -86,7 +86,8 @@
                                     <span>@Model.SocialLinks[i].SocialNetwork.Url</span>
                                 </td>
                                 <td class="align-middle w-100">
-                                    <input asp-for="SocialLinks[@i].RemainingUrl"
+                                    <input asp-for="@Model.SocialLinks[@i].SocialNetworkId" type="hidden" />
+                                    <input asp-for="@Model.SocialLinks[@i].RemainingUrl"
                                            class="form-control"
                                            aria-required="true"
                                            placeholder="Tu wpisz resztę adresu..." />
@@ -112,25 +113,58 @@
     <partial name="_ValidationScripts" />
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const profileImageInput = document.getElementById("ProfileImage");
-            const profileImagePreview = document.getElementById("ProfileImagePreview");
+        $(document).ready(function () {
+            const $profileImageInput = $("#ProfileImage");
+            const $profileImagePreview = $("#ProfileImagePreview");
 
-            profileImageInput.addEventListener("change", function () {
+            $profileImageInput.on("change", function () {
                 const file = this.files[0];
 
                 if (file) {
                     const reader = new FileReader();
 
-                    // When the image file is loaded
                     reader.onload = function (e) {
-                        profileImagePreview.src = e.target.result; // Set the preview image's source
+                        $profileImagePreview.attr("src", e.target.result);
                     };
 
-                    // Read the image file as a Data URL
                     reader.readAsDataURL(file);
                 }
             });
         });
+
+        $("#profileForm").submit(function (event) {
+            event.preventDefault();
+            
+            if (!$(this).valid()) {            
+                return;
+            }
+
+
+            const formData = new FormData(this);
+
+            $.ajax({
+                url: $(this).attr("action"),
+                type: $(this).attr("method"),
+                data: formData,
+                contentType: false, 
+                processData: false,
+                success: function (result) {
+                    if (result.isSuccess) {
+                        document.title = "Ustawienia profilu " + result.data;
+
+                        $("form#profileForm h2").text(document.title);
+
+                        alert("Profil został zapisany pomyślnie!");
+
+                    } else {
+                        alert("Wystąpił błąd przy zapisywaniu profilu: " + result.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Niespodziewany błąd: " + error);
+                }
+            });
+        });
     </script>
+
 }

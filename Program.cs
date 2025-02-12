@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SocialPulse.Areas.Identity.Data;
-using SocialPulse.Core;
 using SocialPulse.Core.Models.Settings;
 using SocialPulse.Core.Repositories;
 using SocialPulse.Core.Services;
@@ -33,8 +32,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>()
+                .AddScoped<ISocialProfileRepository, SocialProfileRepository>()
+                .AddScoped<IIdentityUserRepository, IdentityUserRepository>()
                 .AddScoped<ISocialNetworkService, SocialNetworkService>()
                 .AddScoped<IUserLinkStyleService, UserLinkStyleService>()
+                .AddScoped<ISocialProfileService, SocialProfileService>()
                 .AddScoped<IUnitOfWork, UnitOfWork>()
                 .AddScoped<IViewRenderService, ViewRenderService>()
                 .AddHttpContextAccessor(); 

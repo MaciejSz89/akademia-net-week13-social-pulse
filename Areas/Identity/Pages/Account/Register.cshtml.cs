@@ -17,8 +17,11 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SocialPulse.Areas.Identity.Data;
+using SocialPulse.Core.Models;
+using SocialPulse.Persistence;
 
 namespace SocialPulse.Areas.Identity.Pages.Account
 {
@@ -30,13 +33,16 @@ namespace SocialPulse.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<SocialPulseUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly SocialPulseContext _context;
+        private const string DefaultProfileImagePath = "/images/default-profile-image.webp";
 
         public RegisterModel(
             UserManager<SocialPulseUser> userManager,
             IUserStore<SocialPulseUser> userStore,
             SignInManager<SocialPulseUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            SocialPulseContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +50,7 @@ namespace SocialPulse.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _context = context;
         }
 
         /// <summary>
@@ -117,16 +124,42 @@ namespace SocialPulse.Areas.Identity.Pages.Account
 
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
-                var user = CreateUser();
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
-                await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                var result = await _userManager.CreateAsync(user, Input.Password);
-
-                if (result.Succeeded)
+                try
                 {
+                    var user = CreateUser();
+
+                    await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
+                    await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                    var result = await _userManager.CreateAsync(user, Input.Password);
+
+                    if (!result.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                        return Page();
+                    }
+
+                    var socialProfile = new SocialProfile
+                    {
+                        SocialPulseUserId = user.Id,
+                        Content = string.Empty,
+                        ProfileImage = GetDefaultProfileImage(),
+                        UserLinkStyle = "btn-secondary"
+                    };
+                    _context.SocialProfiles.Add(socialProfile);
+
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
@@ -150,14 +183,18 @@ namespace SocialPulse.Areas.Identity.Pages.Account
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         return LocalRedirect(returnUrl);
                     }
+
                 }
-                foreach (var error in result.Errors)
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error creating user and profile");
+
+                    ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
+                    return Page();
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
 
@@ -183,5 +220,22 @@ namespace SocialPulse.Areas.Identity.Pages.Account
             }
             return (IUserEmailStore<SocialPulseUser>)_userStore;
         }
+
+        private byte[] GetDefaultProfileImage()
+        {
+            var defaultImagePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                DefaultProfileImagePath.TrimStart('/')
+            );
+
+            if (System.IO.File.Exists(defaultImagePath))
+            {
+                return System.IO.File.ReadAllBytes(defaultImagePath);
+            }
+
+            return Array.Empty<byte>();
+        }
     }
 }
+
