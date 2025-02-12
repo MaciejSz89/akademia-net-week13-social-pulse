@@ -1,32 +1,36 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialPulse.Areas.Identity.Data;
 using SocialPulse.Core.Dtos;
-using SocialPulse.Core.Models;
-using SocialPulse.Core.Services;
+using SocialPulse.Core.Models.Domains;
+using SocialPulse.Core.Models.Services;
 using SocialPulse.Core.ViewModels;
 using System.Security.Claims;
 
 namespace SocialPulse.Controllers;
 
+[Authorize]
 public class SettingsController : Controller
 {
     private readonly ISocialProfileService _socialProfileService;
     private readonly ISocialNetworkService _socialNetworkService;
+    private readonly IUserLinkService _userLinkService;
     private readonly IMapper _mapper;
     private readonly IViewRenderService _viewRenderService;
     private readonly IUserLinkStyleService _userLinkStyleService;
     private readonly SignInManager<SocialPulseUser> _signInManager;
     private readonly UserManager<SocialPulseUser> _userManager;
 
-    public SettingsController(IServiceProvider serviceProvider, 
+    public SettingsController(IServiceProvider serviceProvider,
                               SignInManager<SocialPulseUser> signInManager,
                               UserManager<SocialPulseUser> userManager)
     {
         _socialProfileService = serviceProvider.GetRequiredService<ISocialProfileService>();
         _socialNetworkService = serviceProvider.GetRequiredService<ISocialNetworkService>();
+        _userLinkService = serviceProvider.GetRequiredService<IUserLinkService>();
         _mapper = serviceProvider.GetRequiredService<IMapper>();
         _viewRenderService = serviceProvider.GetRequiredService<IViewRenderService>();
         _userLinkStyleService = serviceProvider.GetRequiredService<IUserLinkStyleService>();
@@ -104,29 +108,30 @@ public class SettingsController : Controller
     }
 
 
-    public IActionResult MyLinks()
+    public async Task<IActionResult> MyLinks()
     {
-        var model = new SocialProfileViewModel
+        try
         {
-            UserName = "John Doe",
-            UserLinks = new List<UserLinkViewModel>
-                        {
-                            new UserLinkViewModel {
-                                                    Id = 1,
-                                                    Title = "Facebook",
-                                                    Url = "https://facebook.com/johndoe",
-                                                    Image = GetSampleImage("facebook.png")
-                                                  },
-                            new UserLinkViewModel {
-                                                    Id = 2,
-                                                    Title = "X",
-                                                    Url = "https://x.com/johndoe" ,
-                                                    Image = GetSampleImage("x.png")
-                                                  }
-                        }
-        };
+            var userName = User.Identity?.Name;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        return View(model);
+            if (userName == null || userId == null)
+                return NotFound();
+
+            var userLinks = await _userLinkService.GetUserLinksAsync(userId);
+
+            var vm = new SocialProfileViewModel
+            {
+                UserName = userName,
+                UserLinks = _mapper.Map<IEnumerable<UserLinkViewModel>>(userLinks).ToList()
+            };
+            return View(vm);
+        }
+        catch (Exception)
+        {
+            return NotFound();
+        }
+
     }
 
     public IActionResult LinksStyles()
@@ -233,18 +238,6 @@ public class SettingsController : Controller
         return Json(response);
     }
 
-    private byte[]? GetSampleImage(string imageName)
-    {
-        var filePath = Path.Combine("wwwroot", "images", imageName);
-        if (!System.IO.File.Exists(filePath))
-        {
-            return null;
-        }
-
-        var imageBytes = System.IO.File.ReadAllBytes(filePath);
-        return imageBytes;
-    }
-
     private async Task<SocialProfileViewModel?> CreateSocialProfileViewModelAsync()
     {
         var socialNetworks = _mapper.Map<List<SocialNetworkViewModel>>(await _socialNetworkService.GetAsync());
@@ -282,7 +275,7 @@ public class SettingsController : Controller
             UserName = userName,
             SocialLinks = links,
             ProfileImage = socialProfile.ProfileImage,
-            Content = socialProfile.Content            
+            Content = socialProfile.Content
         };
 
         return vm;

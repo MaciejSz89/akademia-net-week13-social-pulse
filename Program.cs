@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SocialPulse.Areas.Identity.Data;
-using SocialPulse.Core.Models.Settings;
-using SocialPulse.Core.Repositories;
-using SocialPulse.Core.Services;
+using SocialPulse.Core;
+using SocialPulse.Core.Models.Domains.Settings;
+using SocialPulse.Core.Models.Repositories;
+using SocialPulse.Core.Models.Services;
 using SocialPulse.Persistence;
 using SocialPulse.Persistence.Repositories;
 using SocialPulse.Persistence.Services;
@@ -34,9 +35,11 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>()
                 .AddScoped<ISocialProfileRepository, SocialProfileRepository>()
                 .AddScoped<IIdentityUserRepository, IdentityUserRepository>()
+                .AddScoped<IUserLinkRepository, UserLinkRepository>()
                 .AddScoped<ISocialNetworkService, SocialNetworkService>()
                 .AddScoped<IUserLinkStyleService, UserLinkStyleService>()
                 .AddScoped<ISocialProfileService, SocialProfileService>()
+                .AddScoped<IUserLinkService, UserLinkService>()
                 .AddScoped<IUnitOfWork, UnitOfWork>()
                 .AddScoped<IViewRenderService, ViewRenderService>()
                 .AddHttpContextAccessor(); 

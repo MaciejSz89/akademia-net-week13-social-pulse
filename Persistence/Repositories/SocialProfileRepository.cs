@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SocialPulse.Core.Models;
-using SocialPulse.Core.Repositories;
+using SocialPulse.Core.Models.Domains;
+using SocialPulse.Core.Models.Repositories;
 
 namespace SocialPulse.Persistence.Repositories
 {

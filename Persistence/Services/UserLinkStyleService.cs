@@ -1,4 +1,4 @@
-﻿using SocialPulse.Core.Services;
+﻿using SocialPulse.Core.Models.Services;
 
 namespace SocialPulse.Persistence.Services
 {

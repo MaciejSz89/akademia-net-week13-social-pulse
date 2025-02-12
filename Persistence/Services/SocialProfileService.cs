@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using SocialPulse.Core.Models;
-using SocialPulse.Core.Repositories;
-using SocialPulse.Core.Services;
+using SocialPulse.Core;
+using SocialPulse.Core.Models.Domains;
+using SocialPulse.Core.Models.Services;
 using SocialPulse.Core.ViewModels;
 using System.Security.Claims;
 

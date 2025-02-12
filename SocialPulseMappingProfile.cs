@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using SocialPulse.Core.Dtos;
-using SocialPulse.Core.Models;
+using SocialPulse.Core.Models.Domains;
 using SocialPulse.Core.ViewModels;
 using SocialPulse.Helpers;
 
@@ -11,6 +11,7 @@ namespace SocialPulse
         public SocialPulseMappingProfile()
         {
             CreateMap<SocialProfile, SocialProfileViewModel>();
+            CreateMap<UserLink, UserLinkViewModel>();
             CreateMap<SocialProfileViewModel, SocialProfile>();
             CreateMap<SocialProfileDto, SocialProfile>()
                         .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src =>

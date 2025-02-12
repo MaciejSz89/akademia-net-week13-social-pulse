@@ -1,7 +1,8 @@
-﻿using SocialPulse.Core.Repositories;
+﻿using SocialPulse.Core;
+using SocialPulse.Core.Models.Repositories;
 using System;
 
-namespace SocialPulse.Persistence.Repositories
+namespace SocialPulse.Persistence
 {
     public class UnitOfWork : IUnitOfWork
     {
@@ -9,6 +10,7 @@ namespace SocialPulse.Persistence.Repositories
         private readonly ISocialNetworkRepository _socialNetworkRepository;
         private readonly ISocialProfileRepository _socialProfileRepository;
         private readonly IIdentityUserRepository _identityUserRepository;
+        private readonly IUserLinkRepository _userLinkRepository;
 
 
         public UnitOfWork(IServiceProvider serviceProvider)
@@ -17,13 +19,15 @@ namespace SocialPulse.Persistence.Repositories
             _socialNetworkRepository = serviceProvider.GetRequiredService<ISocialNetworkRepository>();
             _socialProfileRepository = serviceProvider.GetRequiredService<ISocialProfileRepository>();
             _identityUserRepository = serviceProvider.GetRequiredService<IIdentityUserRepository>();
-
+            _userLinkRepository = serviceProvider.GetRequiredService<IUserLinkRepository>();
         }
         public ISocialNetworkRepository SocialNetworkRepository => _socialNetworkRepository;
 
         public ISocialProfileRepository SocialProfileRepository => _socialProfileRepository;
 
         public IIdentityUserRepository IdentityUserRepository => _identityUserRepository;
+
+        public IUserLinkRepository UserLinkRepository => _userLinkRepository;
 
         public async Task<int> SaveChangesAsync()
         {

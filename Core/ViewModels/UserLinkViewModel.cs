@@ -1,4 +1,4 @@
-﻿using SocialPulse.Core.Models;
+﻿using SocialPulse.Core.Models.Domains;
 
 namespace SocialPulse.Core.ViewModels
 {

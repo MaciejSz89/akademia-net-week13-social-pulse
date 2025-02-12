@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SocialPulse.Areas.Identity.Data;
 using SocialPulse.Core;
-using SocialPulse.Core.Models;
+using SocialPulse.Core.Models.Domains;
 using System.Reflection.Emit;
 
 namespace SocialPulse.Persistence;

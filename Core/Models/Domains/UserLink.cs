@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace SocialPulse.Core.Models
+namespace SocialPulse.Core.Models.Domains
 {
     public class UserLink
     {
@@ -9,7 +9,7 @@ namespace SocialPulse.Core.Models
         public string Url { get; set; } = null!;
         public byte[]? Image { get; set; }
         public int SocialProfileId { get; set; }
-        public SocialProfile? SocialProfile { get; set; }
+        public SocialProfile SocialProfile { get; set; } = null!;
 
     }
 }

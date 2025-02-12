@@ -1,6 +1,6 @@
-﻿using SocialPulse.Core.Models;
+﻿using SocialPulse.Core.Models.Domains;
 
-namespace SocialPulse.Core.Services
+namespace SocialPulse.Core.Models.Services
 {
     public interface ISocialNetworkService
     {
