@@ -27,7 +27,6 @@ namespace SocialPulse.Persistence.Services
                 }
                 else
                 {
-                    network.Id = 0;
                     await _unitOfWork.SocialNetworkRepository.AddAsync(network);
                 }
             }

@@ -19,5 +19,26 @@
     "Url": "https://www.x.com/",
     "BaseDomain": "x.com",
     "IconPath": "wwwroot/images/x.png"
+  },
+  {
+    "Id": 4,
+    "Name": "YouTube",
+    "Url": "https://www.youtube.com/",
+    "BaseDomain": "youtube.com",
+    "IconPath": "wwwroot/images/youtube.png"
+  },
+  {
+    "Id": 5,
+    "Name": "TikTok",
+    "Url": "https://www.tiktok.com/",
+    "BaseDomain": "tiktok.com",
+    "IconPath": "wwwroot/images/tiktok.webp"
+  },
+  {
+    "Id": 6,
+    "Name": "LinkedIn",
+    "Url": "https://www.linkedin.com/",
+    "BaseDomain": "linkedin.com",
+    "IconPath": "wwwroot/images/linkedin.webp"
   }
 ]
