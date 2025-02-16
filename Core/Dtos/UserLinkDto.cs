@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public string Title { get; set; } = null!;
         public string Url { get; set; } = null!;
-        public int SocialProfileId { get; set; }
+        public IFormFile? Image { get; set; }
+        public string? ImageBase64 { get; set; }
     }
 }

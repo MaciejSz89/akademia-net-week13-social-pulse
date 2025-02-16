@@ -1,6 +1,6 @@
 ﻿using SocialPulse.Areas.Identity.Data;
 
-namespace SocialPulse.Core.Models
+namespace SocialPulse.Core.Models.Domains
 {
     public class SocialProfile
     {
@@ -11,6 +11,6 @@ namespace SocialPulse.Core.Models
         public string UserLinkStyle { get; set; } = "btn-secondary";
         public List<UserLink> UserLinks { get; set; } = new List<UserLink>();
         public List<SocialLink> SocialLinks { get; set; } = new List<SocialLink>();
-        public SocialPulseUser? SocialPulseUser { get; set; }
+        public SocialPulseUser SocialPulseUser { get; set; } = null!;
     }
 }

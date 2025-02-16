@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SocialPulse.Areas.Identity.Data;
-using SocialPulse.Core.Repositories;
+using SocialPulse.Core.Models.Repositories;
 
 namespace SocialPulse.Persistence.Repositories
 {

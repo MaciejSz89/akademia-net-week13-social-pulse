@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SocialPulse.Core;
 using SocialPulse.Core.Dtos;
-using SocialPulse.Core.Models;
-using SocialPulse.Core.Repositories;
-using SocialPulse.Core.Services;
+using SocialPulse.Core.Models.Domains;
+using SocialPulse.Core.Models.Services;
 using System.Text.Json;
 
 namespace SocialPulse.Persistence.Services

@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace SocialPulse.Core.Models
+namespace SocialPulse.Core.Models.Domains
 {
     public class SocialNetwork
     {

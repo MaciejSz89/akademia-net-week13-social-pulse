@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace SocialPulse.Core.Repositories
+namespace SocialPulse.Core.Models.Repositories
 {
     public interface IIdentityUserRepository
     {
