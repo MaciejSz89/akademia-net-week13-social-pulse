@@ -10,6 +10,5 @@ namespace SocialPulse.Core.Models.Domains
         public byte[]? Image { get; set; }
         public int SocialProfileId { get; set; }
         public SocialProfile SocialProfile { get; set; } = null!;
-
     }
 }

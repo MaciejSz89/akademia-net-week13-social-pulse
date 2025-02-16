@@ -45,12 +45,17 @@
         formData.append("Image", imageInput.files[0]);
     }
 
+    const token = getAntiForgeryToken();
+
     $.ajax({
         url: '/Settings/AddUserLink/',
         type: 'POST',
         processData: false,
         contentType: false,
         data: formData,
+        headers: {
+            "RequestVerificationToken": token
+        },
         success: function (response) {
             if (!response.isSuccess) {
                 console.error(response.message);
@@ -85,7 +90,7 @@ function saveLink(button) {
     const titleInput = $row.find("input[type='text'][name*='].Title']");
     const urlInput = $row.find("input[type='text'][name*='].Url']");
     const imageInput = $row.find("input[type='file']").get(0);
-
+    const imagePreview = $row.find("img");
 
     const titleValidation = $row.find(`#title-validation-${$row.index()}`);
     const urlValidation = $row.find(`#url-validation-${$row.index()}`);
@@ -125,16 +130,22 @@ function saveLink(button) {
     formData.append("Title", title);
     formData.append("Url", url);
 
-    if (imageInput && imageInput.files.length > 0) {
-        formData.append("Image", imageInput.files[0]);
+    if (imagePreview.is(":visible")) {
+        const imageBase64 = imagePreview.attr("src").split(",")[1];
+        formData.append("ImageBase64", imageBase64);
     }
 
+
+    const token = getAntiForgeryToken();
     $.ajax({
         url: '/Settings/SaveUserLink/',
         type: 'POST',
         processData: false,
         contentType: false,
         data: formData,
+        headers: {
+            "RequestVerificationToken": token
+        },
         success: function (response) {
             if (!response.isSuccess) {
                 console.error(response.message);
@@ -151,6 +162,8 @@ function saveLink(button) {
             alert("Coś poszło nie tak.");
         }
     });
+
+
 }
 
 function removeLink(button) {
@@ -160,16 +173,22 @@ function removeLink(button) {
 
     const confirmation = confirm("Czy na pewno chcesz usunąć ten link?");
     if (!confirmation) {
-        return; 
+        return;
     }
 
     console.log("Id of the object associated with this row:", id);
 
     if (id) {
+
+        const token = getAntiForgeryToken();
+
         $.ajax({
             url: '/Settings/RemoveUserLink/',
             type: 'POST',
             data: { id: id },
+            headers: {
+                "RequestVerificationToken": token
+            },
             success: function (response) {
                 if (response.isSuccess) {
                     $row.remove();
@@ -371,4 +390,8 @@ function removeNewImage() {
     if (fileInput) {
         fileInput.value = "";
     }
+}
+
+function getAntiForgeryToken() {
+    return document.querySelector('input[name="__RequestVerificationToken"]').value;
 }

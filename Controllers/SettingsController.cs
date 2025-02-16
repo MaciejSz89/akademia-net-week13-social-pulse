@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using SocialPulse.Areas.Identity.Data;
 using SocialPulse.Core.Dtos;
 using SocialPulse.Core.Models.Domains;
@@ -18,11 +20,11 @@ public class SettingsController : Controller
     private readonly ISocialProfileService _socialProfileService;
     private readonly ISocialNetworkService _socialNetworkService;
     private readonly IUserLinkService _userLinkService;
+    private readonly ISocialPulseUserService _socialPulseUserService;
     private readonly IMapper _mapper;
     private readonly IViewRenderService _viewRenderService;
     private readonly IUserLinkStyleService _userLinkStyleService;
     private readonly SignInManager<SocialPulseUser> _signInManager;
-    private readonly UserManager<SocialPulseUser> _userManager;
 
     public SettingsController(IServiceProvider serviceProvider,
                               SignInManager<SocialPulseUser> signInManager,
@@ -34,8 +36,8 @@ public class SettingsController : Controller
         _mapper = serviceProvider.GetRequiredService<IMapper>();
         _viewRenderService = serviceProvider.GetRequiredService<IViewRenderService>();
         _userLinkStyleService = serviceProvider.GetRequiredService<IUserLinkStyleService>();
+        _socialPulseUserService = serviceProvider.GetRequiredService<ISocialPulseUserService>();
         _signInManager = signInManager;
-        _userManager = userManager;
     }
 
     public async Task<IActionResult> Profile()
@@ -67,14 +69,14 @@ public class SettingsController : Controller
         {
             var socialProfile = _mapper.Map<SocialProfile>(socialProfileDto);
 
-            var currentUserName = User.Identity?.Name;
-            var currentEmail = User.FindFirstValue(ClaimTypes.Email);
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUserName = _socialPulseUserService.GetCurrentUserName();
+            var currentEmail = _socialPulseUserService.GetCurrentUserEmail();
+            var userId = _socialPulseUserService.GetCurrentUserId();
 
             if (userId == null)
                 throw new NullReferenceException("User not found");
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = _socialPulseUserService.GetCurrentUser();
 
             if (user == null)
                 throw new NullReferenceException("User not found");
@@ -103,26 +105,22 @@ public class SettingsController : Controller
         return Json(new ResponseDto<string?>
         {
             IsSuccess = true,
-            Data = User.Identity?.Name
+            Data = _socialPulseUserService.GetCurrentUserName()
         });
     }
 
 
-    public async Task<IActionResult> MyLinks()
+    public async Task<IActionResult> UserLinks()
     {
         try
         {
-            var userName = User.Identity?.Name;
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userName == null || userId == null)
-                return NotFound();
+            var userId = _socialPulseUserService.GetCurrentUserId();
 
             var userLinks = await _userLinkService.GetUserLinksAsync(userId);
 
             var vm = new SocialProfileViewModel
             {
-                UserName = userName,
+                UserName = _socialPulseUserService.GetCurrentUserName(),
                 UserLinks = _mapper.Map<IEnumerable<UserLinkViewModel>>(userLinks).ToList()
             };
             return View(vm);
@@ -130,6 +128,123 @@ public class SettingsController : Controller
         catch (Exception)
         {
             return NotFound();
+        }
+
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddUserLink([FromForm] UserLinkDto userLink)
+    {
+
+        if (!ModelState.IsValid)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak."
+            });
+        }
+
+        try
+        {
+            var newLink = _mapper.Map<UserLink>(userLink);
+
+            newLink.SocialProfileId = (await _socialProfileService.GetSocialProfileAsync()).Id;
+
+            await _userLinkService.AddUserLinkAsync(newLink);
+
+            return Json(new ResponseDto<string>
+            {
+                IsSuccess = true,
+                Data = await _viewRenderService.RenderToStringAsync("_UserLinkRow", _mapper.Map<UserLinkViewModel>(newLink))
+            });
+
+        }
+        catch (Exception)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak."
+            });
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RemoveUserLink(int id)
+    {
+        if (!ModelState.IsValid)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak."
+            });
+        }
+
+        try
+        {
+            var socialProfileId = (await _socialProfileService.GetSocialProfileAsync()).Id;
+
+            await _userLinkService.RemoveUserLinkAsync(id);
+
+            var response = new ResponseDto
+            {
+                IsSuccess = true,
+            };
+
+            return Json(response);
+        }
+        catch (Exception)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak."
+            });
+        }
+
+
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SaveUserLink([FromForm] UserLinkDto userLink)
+    {
+
+        if (!ModelState.IsValid)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak."
+            });
+        }
+
+        try
+        {
+            var socialProfileId = (await _socialProfileService.GetSocialProfileAsync()).Id;
+
+            var userLinkToUpdate = _mapper.Map<UserLink>(userLink);
+
+            userLinkToUpdate.SocialProfileId = socialProfileId;
+
+            await _userLinkService.UpdateUserLinkAsync(userLinkToUpdate);
+
+            var response = new ResponseDto
+            {
+                IsSuccess = true
+            };
+
+            return Json(response);
+        }
+        catch (Exception)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak."
+            });
         }
 
     }
@@ -162,95 +277,12 @@ public class SettingsController : Controller
         });
     }
 
-    [HttpPost]
-    public IActionResult RemoveUserLink(int Id)
-    {
-        if (!ModelState.IsValid)
-        {
-            return Json(new ResponseDto
-            {
-                IsSuccess = false,
-                Message = "Invalid input data."
-            });
-        }
-
-        var response = new ResponseDto
-        {
-            IsSuccess = true,
-        };
-
-        return Json(response);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> AddUserLink([FromForm] UserLinkDto newLinkDto, IFormFile? image)
-    {
-
-        if (!ModelState.IsValid)
-        {
-            return Json(new ResponseDto
-            {
-                IsSuccess = false,
-                Message = "Invalid input data."
-            });
-        }
-
-        var newLink = _mapper.Map<UserLinkViewModel>(newLinkDto);
-        newLink.Id = new Random().Next(1, 1000);
-
-        if (image != null)
-        {
-            using (var ms = new MemoryStream())
-            {
-                image.CopyTo(ms);
-                var fileBytes = ms.ToArray();
-                newLink.Image = fileBytes;
-            }
-        }
-
-        var response = new ResponseDto<string>
-        {
-            IsSuccess = true,
-            Data = await _viewRenderService.RenderToStringAsync("_UserLinkRow", newLink)
-        };
-
-        return Json(response);
-    }
-
-    [HttpPost]
-    public IActionResult SaveUserLink([FromForm] UserLinkDto updatedLinkDto, IFormFile? image)
-    {
-
-        if (!ModelState.IsValid)
-        {
-            return Json(new ResponseDto
-            {
-                IsSuccess = false,
-                Message = "Invalid input data."
-            });
-        }
-
-        var response = new ResponseDto
-        {
-            IsSuccess = true
-        };
-
-        return Json(response);
-    }
 
     private async Task<SocialProfileViewModel?> CreateSocialProfileViewModelAsync()
     {
         var socialNetworks = _mapper.Map<List<SocialNetworkViewModel>>(await _socialNetworkService.GetAsync());
 
-        var userName = User.Identity?.Name;
-        var email = User.FindFirstValue(ClaimTypes.Email);
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-
-        if (email == null || userName == null || userId == null)
-            return null;
-
-        var socialProfile = await _socialProfileService.GetSocialProfileByUserIdAsync(userId);
+        var socialProfile = await _socialProfileService.GetSocialProfileAsync();
 
         List<SocialLinkViewModel> links = new List<SocialLinkViewModel>();
 
@@ -271,8 +303,8 @@ public class SettingsController : Controller
         var vm = new SocialProfileViewModel
         {
             Id = socialProfile.Id,
-            Email = email,
-            UserName = userName,
+            Email = _socialPulseUserService.GetCurrentUserEmail(),
+            UserName = _socialPulseUserService.GetCurrentUserName(),
             SocialLinks = links,
             ProfileImage = socialProfile.ProfileImage,
             Content = socialProfile.Content

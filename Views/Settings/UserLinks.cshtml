@@ -7,6 +7,8 @@
 }
 
 <div class="container">
+    @Html.AntiForgeryToken()
+
     <div class="row">
         <div class="col-md-12">
             <h2>@ViewData["Title"]</h2>
@@ -45,40 +47,66 @@
                 <h4>Dodaj link</h4>
                 <div class="row g-3 align-items-center">
                     <div class="col-md-4">
-                        <input type="text" id="newLinkTitle" class="form-control" placeholder="Wpisz tytuł..." />
-                        <span id="newLinkTitleValidation" class="text-danger small d-block" style="display: none;"></span>
+                        <input type="text"
+                               id="newLinkTitle"
+                               class="form-control"
+                               placeholder="Wpisz tytuł..." />
+                        <span id="newLinkTitleValidation"
+                              class="text-danger small d-block"
+                              style="display: none;"></span>
                     </div>
 
                     <div class="col-md-4">
-                        <input type="text" id="newLinkUrl" class="form-control" placeholder="Wpisz adres URL..." />
-                        <span id="newLinkUrlValidation" class="text-danger small d-block" style="display: none;"></span>
+                        <input type="text"
+                               id="newLinkUrl"
+                               class="form-control"
+                               placeholder="Wpisz adres URL..." />
+                        <span id="newLinkUrlValidation"
+                              class="text-danger small d-block"
+                              style="display: none;"></span>
                     </div>
 
                     <div class="col-md-4">
                         <div class="d-flex align-items-center gap-3">
-                            <img id="newImagePreview" src="" alt="Preview" class="img-thumbnail"
+                            <img id="newImagePreview"
+                                 src="" alt="Preview"
+                                 class="img-thumbnail"
                                  style="width: 50px; height: 50px; display: none;" />
                             <span id="newNoImageSpan" class="text-muted">Brak obrazka</span>
 
                             <div>
-                                <button type="button" class="btn btn-primary btn-sm me-2" onclick="triggerFileInput('newLinkImage')">
+                                <button type="button"
+                                        class="btn btn-primary btn-sm me-2"
+                                        onclick="triggerFileInput('newLinkImage')">
                                     Dodaj obrazek
                                 </button>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="removeNewImage()">
+                                <button type="button"
+                                        class="btn btn-secondary btn-sm"
+                                        onclick="removeNewImage()">
                                     Usuń obrazek
                                 </button>
                             </div>
                         </div>
 
-                        <input type="hidden" id="newHiddenImage" name="newLinkImageBase64" value="" />
+                        <input type="hidden"
+                               id="newHiddenImage"
+                               name="newLinkImageBase64"
+                               value="" />
 
-                        <input type="file" id="newLinkImage" class="form-control form-control-sm change-image-input"
-                               style="display: none;" onchange="previewNewImage(this)" />
-                        <span id="newLinkImageValidation" class="text-danger small d-block" style="display: none;"></span>
+                        <input type="file" id="newLinkImage"
+                               class="form-control form-control-sm change-image-input"
+                               style="display: none;"
+                               onchange="previewNewImage(this)" />
+                        <span id="newLinkImageValidation"
+                              class="text-danger small d-block"
+                              style="display: none;"></span>
                     </div>
 
                     <div class="col-md-2">
-                        <button type="button" class="btn btn-primary" id="addLinkButton" onclick="addLink()">
+                        <button type="button"
+                                class="btn btn-primary"
+                                id="addLinkButton"
+                                onclick="addLink()">
                             Dodaj link
                         </button>
                     </div>
@@ -89,5 +117,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/settings-my-links.js" asp-append-version="true"></script>
+    <script src="~/js/settings-user-links.js" asp-append-version="true"></script>
 }

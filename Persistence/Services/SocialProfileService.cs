@@ -11,14 +11,23 @@ namespace SocialPulse.Persistence.Services
     public class SocialProfileService : ISocialProfileService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISocialPulseUserService _socialPulseUserService;
 
         public SocialProfileService(IServiceProvider serviceProvider)
         {
             _unitOfWork = serviceProvider.GetRequiredService<IUnitOfWork>();
+            _socialPulseUserService = serviceProvider.GetRequiredService<ISocialPulseUserService>();
         }
 
-        public async Task<SocialProfile> GetSocialProfileByUserIdAsync(string userId)
+        public async Task<SocialProfile> GetSocialProfileAsync()
         {
+            var userId = _socialPulseUserService.GetCurrentUserId();
+
+            if (userId == null)
+            {
+                throw new NullReferenceException("User not found");
+            }
+
             return await _unitOfWork.SocialProfileRepository.GetByUserIdAsync(userId);
         }
 
