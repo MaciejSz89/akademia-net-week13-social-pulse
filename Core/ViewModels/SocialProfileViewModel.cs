@@ -29,5 +29,6 @@ namespace SocialPulse.Core.ViewModels
         [Display(Name = "Nazwa profilu")]
         [Required(ErrorMessage = "Pole Nazwa profilu jest wymagane.")]
         public string UserName { get; set; } = null!;
+
     }
 }

@@ -249,36 +249,49 @@ public class SettingsController : Controller
 
     }
 
-    public IActionResult LinksStyles()
+    public async Task<IActionResult> LinksStyles()
     {
-        var vm = new UserLinkStyleViewModel
+        try
         {
-            SocialProfile = new SocialProfile
-            {
-                UserLinkStyle = "btn-secondary",
-                SocialPulseUser = new Areas.Identity.Data.SocialPulseUser
-                {
-                    UserName = "User1"
-                }
-            },
-            UserLinkStyles = _userLinkStyleService.GetUserLinkStyles()
-        };
-        return View(vm);
+            var vm = await CreateUserLinkStyleViewModelAsync();
+            return View(vm);
+        }
+        catch (Exception)
+        {
+            return NotFound();
+        }
     }
+
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult SaveStyle(string userLinkStyle)
+    public async Task<IActionResult> SaveLinkStyle(string userLinkStyle)
     {
-        return Json(new ResponseDto<string>
+        try
         {
-            IsSuccess = true,
-            Data = userLinkStyle
-        });
+            await _userLinkStyleService.UpdateUserLinkStyleAsync(userLinkStyle);
+
+            return Json(new ResponseDto<string>
+            {
+                IsSuccess = true,
+                Data = userLinkStyle
+            });
+        }
+        catch (Exception)
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak."
+            });
+        }
+
+
     }
 
 
-    private async Task<SocialProfileViewModel?> CreateSocialProfileViewModelAsync()
+    private async Task<SocialProfileViewModel> CreateSocialProfileViewModelAsync()
     {
         var socialNetworks = _mapper.Map<List<SocialNetworkViewModel>>(await _socialNetworkService.GetAsync());
 
@@ -307,11 +320,22 @@ public class SettingsController : Controller
             UserName = _socialPulseUserService.GetCurrentUserName(),
             SocialLinks = links,
             ProfileImage = socialProfile.ProfileImage,
-            Content = socialProfile.Content
+            Content = socialProfile.Content,
+
         };
 
         return vm;
 
+    }
+
+    private async Task<UserLinkStyleViewModel> CreateUserLinkStyleViewModelAsync()
+    {
+        return new UserLinkStyleViewModel
+        {
+            UserName = _socialPulseUserService.GetCurrentUserName(),
+            CurrentUserLinkStyle = await _userLinkStyleService.GetCurrentUserLinkStyleAsync(),
+            UserLinkStyles = _userLinkStyleService.GetUserLinkStyles()
+        };
     }
 
 }
