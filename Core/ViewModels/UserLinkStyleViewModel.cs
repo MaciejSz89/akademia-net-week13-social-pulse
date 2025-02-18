@@ -4,8 +4,8 @@ namespace SocialPulse.Core.ViewModels
 {
     public class UserLinkStyleViewModel
     {
-        public SocialProfile SocialProfile { get; set; } = null!;
+        public string UserName { get; set; } = null!;
+        public string CurrentUserLinkStyle { get; set; } = null!;
         public List<string> UserLinkStyles { get; set; } = new();
-
     }
 }
