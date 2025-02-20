@@ -1,13 +1,12 @@
 ﻿using System.Drawing;
 
-namespace SocialPulse.Core.Models.Domains
+namespace SocialPulse.Core.Models.Domains;
+
+public class SocialNetwork
 {
-    public class SocialNetwork
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string Url { get; set; } = null!;
-        public string BaseDomain { get; set; } = null!;
-        public byte[] Icon { get; set; } = null!;
-    }
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Url { get; set; } = null!;
+    public string BaseDomain { get; set; } = null!;
+    public byte[] Icon { get; set; } = null!;
 }

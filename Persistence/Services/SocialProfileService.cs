@@ -31,6 +31,16 @@ namespace SocialPulse.Persistence.Services
             return await _unitOfWork.SocialProfileRepository.GetByUserIdAsync(userId);
         }
 
+        public async Task<SocialProfile> GetSocialProfileAsync(int id)
+        {
+            var socialProfile = await _unitOfWork.SocialProfileRepository.GetAsync(id);
+
+            if (socialProfile == null)
+                throw new NullReferenceException("Social profile not found");
+
+            return socialProfile;
+        }
+
         public async Task UpdateSocialProfileAsync(SocialProfile socialProfile, string? newUserName, string? newEmail)
         {
             if (newUserName != null)

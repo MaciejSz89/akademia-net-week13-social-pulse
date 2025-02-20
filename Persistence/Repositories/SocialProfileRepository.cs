@@ -20,14 +20,18 @@ namespace SocialPulse.Persistence.Repositories
 
         public async Task<SocialProfile?> GetAsync(int id)
         {
-            return await _context.SocialProfiles.SingleOrDefaultAsync(x => x.Id == id);
+            return await _context.SocialProfiles.Include(x => x.SocialLinks)
+                                 .ThenInclude(x => x.SocialNetwork)
+                                 .Include(x => x.UserLinks)
+                                 .Include(x => x.SocialPulseUser)
+                                 .SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task UpdateAsync(SocialProfile socialProfile)
         {
             var socialProfileToUpdate = await _context.SocialProfiles
                                                       .Include(x => x.SocialLinks)
-                                                      .SingleAsync(x => x.Id == socialProfile.Id);                     
+                                                      .SingleAsync(x => x.Id == socialProfile.Id);
 
             CopySocialProfileMembers(socialProfile, socialProfileToUpdate);
         }
@@ -35,7 +39,7 @@ namespace SocialPulse.Persistence.Repositories
         private static void CopySocialProfileMembers(SocialProfile source, SocialProfile destination)
         {
             destination.Content = source.Content;
-            if(source.ProfileImage.Length != 0)
+            if (source.ProfileImage.Length != 0)
                 destination.ProfileImage = source.ProfileImage;
 
             var socialLinksToRemove = destination.SocialLinks
@@ -71,6 +75,9 @@ namespace SocialPulse.Persistence.Repositories
         {
             return await _context.SocialProfiles
                                  .Include(x => x.SocialLinks)
+                                 .ThenInclude(x => x.SocialNetwork)
+                                 .Include(x => x.UserLinks)
+                                 .Include(x => x.SocialPulseUser)
                                  .SingleAsync(x => x.SocialPulseUserId == userId);
         }
     }

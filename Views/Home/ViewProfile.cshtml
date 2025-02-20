@@ -1,0 +1,83 @@
+﻿@model SocialPulse.Core.ViewModels.SocialProfileViewModel
+@using System.Text
+
+@{
+    ViewData["Title"] = "Profil użytkownika " + Model.UserName;
+}
+
+<div class="container my-4">
+    <div class="row mb-3">
+        <div class="col-md-3 text-center">
+            @if (!string.IsNullOrWhiteSpace(Model.ProfileImageBase64))
+            {
+                <img src="@Model.ProfileImageBase64"
+                     alt="Zdjęcie użytkownika"
+                     class="img-fluid rounded-circle" />
+            }
+            else
+            {
+                <img src="~/images/default-profile-image.webp"
+                     alt="Zdjęcie uzytkownika"
+                     class="img-fluid rounded-circle" />
+            }
+        </div>
+        <div class="col-md-9">
+            <h2>@Model.UserName</h2>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p>@Model.Content</p>
+        </div>
+    </div>
+
+    @if (Model.UserLinks != null && Model.UserLinks.Any())
+    {
+        <hr class="my-4" />
+        <h4>Linki użytkownika</h4>
+        @foreach (var link in Model.UserLinks)
+        {
+            <!-- Each link goes in one 'col' of the grid -->
+            <div class="row h-100 text-center my-3">
+                <div class="col-5">
+                    <div class="card-body d-flex flex-row align-items-center justify-content-center">
+                        <!-- If you have an icon -->
+                        @if (link.Image != null)
+                        {
+                            <img src="@link.ImageBase64"
+                                 alt="@link.Title"
+                                 class="me-2"
+                                 style="max-height: 40px;" />
+                        }
+
+                        <!-- The link button -->
+                        <a href="@link.Url"
+                           target="_blank"
+                           class="btn @Model.UserLinkStyle w-100">
+                            @link.Title
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    @if (Model.SocialLinks != null && Model.SocialLinks.Any(x => x.IsVisible))
+    {
+        <hr class="my-4" />
+        <h4>Linki społecznościowe</h4>
+        <div class="d-flex flex-row g-3 mt-2">
+            @foreach (var socialLink in Model.SocialLinks.Where(x => x.IsVisible))
+            {
+                var finalUrl = $"{socialLink.SocialNetwork.Url}{socialLink.RemainingUrl}";
+                <div class="text-center me-4 mb-3">
+                    <div>
+                        <a href="@finalUrl"
+                           target="_blank">
+                            <img src="@socialLink.SocialNetwork.IconBase64"
+                                 style="height: 40px;"
+                                 alt="@socialLink.SocialNetwork.Name" />
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
