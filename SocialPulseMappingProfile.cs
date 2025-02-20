@@ -10,7 +10,10 @@ namespace SocialPulse
     {
         public SocialPulseMappingProfile()
         {
-            CreateMap<SocialProfile, SocialProfileViewModel>();
+            CreateMap<SocialProfile, SocialProfileViewModel>().ForMember(x => x.UserName,
+                                                                         opt => opt.MapFrom(src => src.SocialPulseUser.UserName))
+                                                              .ForMember(x => x.Email,
+                                                                         opt => opt.MapFrom(src => src.SocialPulseUser.Email));
             CreateMap<UserLink, UserLinkViewModel>();
             CreateMap<SocialProfileViewModel, SocialProfile>();
             CreateMap<SocialProfileDto, SocialProfile>()
