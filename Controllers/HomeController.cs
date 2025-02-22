@@ -20,9 +20,16 @@ public class HomeController : Controller
         _socialProfileService = serviceProvider.GetRequiredService<ISocialProfileService>();
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        var vm = await CreateSocialProfilesViewModel();
+
+        return View(vm);
+    }
+
+    private async Task <IEnumerable<SocialProfileViewModel>> CreateSocialProfilesViewModel()
+    {
+        return _mapper.Map<IEnumerable<SocialProfileViewModel>>(await _socialProfileService.GetSocialProfilesAsync());
     }
 
     public IActionResult Privacy()

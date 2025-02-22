@@ -41,6 +41,11 @@ namespace SocialPulse.Persistence.Services
             return socialProfile;
         }
 
+        public async Task<IEnumerable<SocialProfile>> GetSocialProfilesAsync()
+        {
+            return await _unitOfWork.SocialProfileRepository.GetAsync();
+        }
+
         public async Task UpdateSocialProfileAsync(SocialProfile socialProfile, string? newUserName, string? newEmail)
         {
             if (newUserName != null)

@@ -15,7 +15,9 @@ namespace SocialPulse.Persistence.Repositories
 
         public async Task<IEnumerable<SocialProfile>> GetAsync()
         {
-            return await _context.SocialProfiles.ToListAsync();
+            return await _context.SocialProfiles
+                                 .Include(x=>x.SocialPulseUser)
+                                 .ToListAsync();
         }
 
         public async Task<SocialProfile?> GetAsync(int id)
