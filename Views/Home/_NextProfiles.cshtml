@@ -1,0 +1,7 @@
+﻿@using SocialPulse.Core.ViewModels
+@model IEnumerable<SocialProfileViewModel>
+
+@foreach (var profile in Model)
+{
+    @await Html.PartialAsync("_SocialProfileOverview", profile)
+}
