@@ -7,6 +7,7 @@ using SocialPulse.Core;
 using SocialPulse.Core.Models.Domains.Settings;
 using SocialPulse.Core.Models.Repositories;
 using SocialPulse.Core.Models.Services;
+using SocialPulse.Hubs;
 using SocialPulse.Persistence;
 using SocialPulse.Persistence.Repositories;
 using SocialPulse.Persistence.Services;
@@ -43,7 +44,10 @@ builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>()
                 .AddScoped<IUserLinkService, UserLinkService>()
                 .AddScoped<IUnitOfWork, UnitOfWork>()
                 .AddScoped<IViewRenderService, ViewRenderService>()
-                .AddHttpContextAccessor(); 
+                .AddHttpContextAccessor()
+                .AddHostedService<CacheCleanupService>();
+
+builder.Services.AddSignalR();
 
 // Register the email sender if email settings are configured
 if (isEmailConfigured)
@@ -102,5 +106,7 @@ app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<CacheHub>("/cacheHub");
 
 app.Run();

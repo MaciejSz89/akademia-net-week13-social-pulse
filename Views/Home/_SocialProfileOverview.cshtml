@@ -1,0 +1,29 @@
+﻿@using SocialPulse.Core.ViewModels
+@model SocialProfileViewModel
+
+<div class="col-md-4 mb-3">
+    <div class="card">
+        <img class="card-img-top"
+             src="@Model.ProfileImageBase64"
+             alt="Zdjęcie profilowe"
+             style="max-height:200px; object-fit:cover;" />
+
+        <div class="card-body">
+            <h5 class="card-title">@Model.UserName</h5>
+
+            <p class="card-text">
+                @(Model.Content.Length > 100
+                    ? Model.Content.Substring(0, 100) + "..."
+                    : Model.Content)
+            </p>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    data-toggle="modal"
+                    data-target="#profileModal"
+                    onclick="window.location.href='@Url.Action("ViewProfile", "Home", new { id = Model.Id })'">
+                Wyświetl profil
+            </button>
+        </div>
+    </div>
+</div>

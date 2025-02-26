@@ -16,6 +16,14 @@ namespace SocialPulse
                                                                          opt => opt.MapFrom(src => src.SocialPulseUser.Email));
             CreateMap<UserLink, UserLinkViewModel>();
             CreateMap<SocialProfileViewModel, SocialProfile>();
+            CreateMap<SocialProfile, SocialProfileOverviewDto>().ForMember(
+                dest => dest.ProfileImageBase64,
+                opt => opt.MapFrom(src =>
+                    src.ProfileImage != null
+                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(src.ProfileImage)}"
+                        : string.Empty
+                )
+            );
             CreateMap<SocialProfileDto, SocialProfile>()
                         .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom(src =>
                             src.ProfileImage != null
