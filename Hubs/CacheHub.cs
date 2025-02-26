@@ -20,10 +20,8 @@ public class CacheHub : Hub
         {
             if (kvp.Value < cutoff)
             {
-                // remove from the keep-alive map
                 _keepAliveMap.TryRemove(kvp.Key, out _);
 
-                // also remove from the in-memory ProfilesCache if you want
                 ProfilesCache.LoadedProfileIdsByGuid.Remove(kvp.Key);
             }
         }

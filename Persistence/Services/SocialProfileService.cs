@@ -36,6 +36,30 @@ namespace SocialPulse.Persistence.Services
         {
             var sessionGuid = Guid.NewGuid().ToString();
 
+            var randomProfiles = await GetInitProfiles(sessionGuid, count);
+            return (sessionGuid, randomProfiles);
+        }
+
+        public async Task<IEnumerable<SocialProfile>> GetNextSocialProfilesAsync(string sessionGuid, int count)
+        {
+            if (!ProfilesCache.LoadedProfileIdsByGuid.ContainsKey(sessionGuid))
+            {
+                var initProfiles = await GetInitProfiles(sessionGuid, count);
+
+                return initProfiles;
+            }
+            else
+            {
+                var nextProfiles = await GetNextProfiles(sessionGuid, count);
+
+                return nextProfiles;
+            }
+
+
+        }
+
+        private async Task<List<SocialProfile>> GetInitProfiles(string sessionGuid, int count)
+        {
             var allProfiles = (await GetSocialProfilesAsync()).ToList();
 
             var randomProfiles = allProfiles
@@ -45,18 +69,12 @@ namespace SocialPulse.Persistence.Services
 
             ProfilesCache.LoadedProfileIdsByGuid[sessionGuid] = randomProfiles.Select(p => p.Id)
                                                                                .ToList();
-            return (sessionGuid, randomProfiles);
+            return randomProfiles;
         }
 
-        public async Task<IEnumerable<SocialProfile>> GetNextSocialProfilesAsync(string sessionGuid, int count)
+        private async Task<List<SocialProfile>> GetNextProfiles(string sessionGuid, int count)
         {
-            if (!ProfilesCache.LoadedProfileIdsByGuid.ContainsKey(sessionGuid))
-            {
-                return new List<SocialProfile>();
-            }
-
-            var alreadyReturnedIds = ProfilesCache
-                .LoadedProfileIdsByGuid[sessionGuid];
+            var alreadyReturnedIds = ProfilesCache.LoadedProfileIdsByGuid[sessionGuid];
 
             var remainingProfiles = (await GetSocialProfilesAsync()).Where(p => !alreadyReturnedIds.Contains(p.Id))
                                                                     .ToList();
@@ -66,7 +84,6 @@ namespace SocialPulse.Persistence.Services
                                         .ToList();
 
             alreadyReturnedIds.AddRange(nextProfiles.Select(p => p.Id));
-
             return nextProfiles;
         }
 
