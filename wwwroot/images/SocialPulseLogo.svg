@@ -1,0 +1,45 @@
+﻿<svg
+    viewBox="0 0 120 120"
+    xmlns="http://www.w3.org/2000/svg"
+>
+	<defs>
+		<!-- Same gradient as before -->
+		<linearGradient id="bubbleGradient" x1="0" y1="0" x2="1" y2="0">
+			<stop offset="0%" stop-color="#FF64B0" />
+			<stop offset="100%" stop-color="#FF8A00" />
+		</linearGradient>
+	</defs>
+
+	<!-- 1) Symmetrical chat bubble with centered tail -->
+	<path
+	  d="M 10 10
+       Q 0 10 0 20
+       L 0 70
+       Q 0 80 10 80
+       L 40 80
+       L 35 100
+       L 60 80
+       L 110 80
+       Q 120 80 120 70
+       L 120 20
+       Q 120 10 110 10
+       Z"
+	  fill="url(#bubbleGradient)"
+  />
+
+	<!-- 2) Optional wave or silhouettes inside -->
+	<!-- Just as an example: the wave -->
+	<path
+	  d="M 25 50 
+       C 40 30, 80 70, 95 50"
+	  fill="none"
+	  stroke="#FFFFFF"
+	  stroke-width="3"
+	  stroke-linecap="round"
+	  stroke-linejoin="round"
+  />
+
+	<!-- 3) Optional silhouette circles -->
+	<circle cx="45" cy="40" r="5" fill="#FFFFFF" />
+	<circle cx="75" cy="40" r="5" fill="#FFFFFF" />
+</svg>
