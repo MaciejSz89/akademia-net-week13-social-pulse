@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using SocialPulse.Core;
 using SocialPulse.Core.Models.Domains;
+using SocialPulse.Core.Models.Repositories;
 using SocialPulse.Core.Models.Services;
 using SocialPulse.Core.ViewModels;
 using SocialPulse.Hubs;
@@ -40,48 +41,55 @@ namespace SocialPulse.Persistence.Services
             return (sessionGuid, randomProfiles);
         }
 
-        public async Task<IEnumerable<SocialProfile>> GetNextSocialProfilesAsync(string sessionGuid, int count)
+        public async Task<IEnumerable<SocialProfile>> GetInitSocialProfilesAsync(string sessionGuid, int count, string query)
+        {
+            var randomProfiles = await GetInitProfiles(sessionGuid, count, query);
+            return randomProfiles;
+        }
+
+        public async Task<IEnumerable<SocialProfile>> GetNextSocialProfilesAsync(string sessionGuid, int count, string? query)
         {
             if (!ProfilesCache.LoadedProfileIdsByGuid.ContainsKey(sessionGuid))
             {
-                var initProfiles = await GetInitProfiles(sessionGuid, count);
+                var initProfiles = await GetInitProfiles(sessionGuid, count, query);
 
                 return initProfiles;
             }
             else
             {
-                var nextProfiles = await GetNextProfiles(sessionGuid, count);
+                var nextProfiles = await GetNextProfiles(sessionGuid, count, query);
 
                 return nextProfiles;
             }
-
-
         }
 
-        private async Task<List<SocialProfile>> GetInitProfiles(string sessionGuid, int count)
+        private async Task<List<SocialProfile>> GetInitProfiles(string sessionGuid, int count, string? query = null)
         {
-            var allProfiles = (await GetSocialProfilesAsync()).ToList();
+            var searchParam = new SocialProfileSearchParams 
+            { 
+                Count = count, 
+                Query = query 
+            };
 
-            var randomProfiles = allProfiles
-                .OrderBy(x => Guid.NewGuid())
-                .Take(count)
-                .ToList();
+            var profiles = (await _unitOfWork.SocialProfileRepository.GetAsync(searchParam)).ToList();
 
-            ProfilesCache.LoadedProfileIdsByGuid[sessionGuid] = randomProfiles.Select(p => p.Id)
-                                                                               .ToList();
-            return randomProfiles;
+            ProfilesCache.LoadedProfileIdsByGuid[sessionGuid] = profiles.Select(p => p.Id)
+                                                                        .ToList();
+            return profiles;
         }
 
-        private async Task<List<SocialProfile>> GetNextProfiles(string sessionGuid, int count)
+        private async Task<List<SocialProfile>> GetNextProfiles(string sessionGuid, int count, string? query = null)
         {
             var alreadyReturnedIds = ProfilesCache.LoadedProfileIdsByGuid[sessionGuid];
 
-            var remainingProfiles = (await GetSocialProfilesAsync()).Where(p => !alreadyReturnedIds.Contains(p.Id))
-                                                                    .ToList();
+            var searchParam = new SocialProfileSearchParams 
+            { 
+                AlreadyReturnedIds = alreadyReturnedIds,
+                Count = count, 
+                Query = query 
+            };
 
-            var nextProfiles = remainingProfiles.OrderBy(x => Guid.NewGuid())
-                                        .Take(count)
-                                        .ToList();
+            var nextProfiles = (await _unitOfWork.SocialProfileRepository.GetAsync(searchParam)).ToList();
 
             alreadyReturnedIds.AddRange(nextProfiles.Select(p => p.Id));
             return nextProfiles;
@@ -95,11 +103,6 @@ namespace SocialPulse.Persistence.Services
                 throw new NullReferenceException("Social profile not found");
 
             return socialProfile;
-        }
-
-        public async Task<IEnumerable<SocialProfile>> GetSocialProfilesAsync()
-        {
-            return await _unitOfWork.SocialProfileRepository.GetAsync();
         }
 
         public async Task UpdateSocialProfileAsync(SocialProfile socialProfile, string? newUserName, string? newEmail)
@@ -122,7 +125,6 @@ namespace SocialPulse.Persistence.Services
 
             await _unitOfWork.SaveChangesAsync();
         }
-
 
     }
 }

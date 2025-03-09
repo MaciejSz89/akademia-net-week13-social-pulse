@@ -30,11 +30,11 @@ public class HomeController : Controller
         return View(vm);
     }
 
-    public async Task<IActionResult> GetNextProfiles(string sessionGuid)
+    public async Task<IActionResult> GetNextProfiles(string sessionGuid, string? query)
     {
         try
         {
-            var profiles = _mapper.Map<IEnumerable<SocialProfileViewModel>>(await _socialProfileService.GetNextSocialProfilesAsync(sessionGuid, nextSocialProfileCount));
+            var profiles = _mapper.Map<IEnumerable<SocialProfileViewModel>>(await _socialProfileService.GetNextSocialProfilesAsync(sessionGuid, nextSocialProfileCount, query));
 
             if (!profiles.Any())
             {
@@ -47,12 +47,23 @@ public class HomeController : Controller
         {
             return new EmptyResult();
         }
-
     }
 
-    public IActionResult Privacy()
+    [HttpGet]
+    public async Task<IActionResult> SearchProfiles(string sessionGuid, string query)
     {
-        return View();
+        try
+        {
+            var profiles = await _socialProfileService.GetInitSocialProfilesAsync(sessionGuid, initSocialProfileCount, query);
+
+            var profilesVm = _mapper.Map<IEnumerable<SocialProfileViewModel>>(profiles);
+
+            return PartialView("_NextProfiles", profilesVm);
+        }
+        catch (Exception)
+        {
+            return new EmptyResult();
+        }
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

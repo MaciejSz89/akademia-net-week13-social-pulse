@@ -6,9 +6,26 @@
     ViewData["Title"] = "Strona główna";
 }
 
-<h2 class="mb-2">Profile</h2>
 
-<input type="hidden" id="sessionGuid" value="@Model.SessionGuid" />
+<input type="hidden"
+       id="sessionGuid"
+       value="@Model.SessionGuid" />
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="form-floating mb-3">
+            <input type="text"
+                   id="searchInput"
+                   class="form-control"
+                   placeholder="Szukaj..." />
+            <label for="searchInput"
+                   class="form-label">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </label>
+        </div>
+    </div>
+</div>
+
 
 <div id="profilesContainer" class="row">
     @foreach (var profile in Model.SocialProfiles)
@@ -18,12 +35,14 @@
 </div>
 
 @section Scripts {
+    <partial name="_ValidationScripts" />
+
     <script>
-            $(document).ready(function () {
+        $(document).ready(function () {
             var sessionGuid = $("#sessionGuid").val();
 
             var connection = new signalR.HubConnectionBuilder()
-                                        .withUrl("/cacheHub") 
+                                        .withUrl("/cacheHub")
                                         .build();
 
             connection.start()
@@ -42,8 +61,8 @@
                     console.error("Could not connect to CacheHub: " + err.toString());
                 });
 
-            var isLoading = false;
-            var noMoreProfiles = false;
+            let isLoading = false;
+            let noMoreProfiles = false;
 
             $(window).on("scroll", function () {
                 if (noMoreProfiles || isLoading) {
@@ -58,21 +77,53 @@
             function loadNextProfiles() {
                 isLoading = true;
 
+                var query = $("#searchInput").val();
+
                 $.ajax({
                   type: "GET",
                   url: "/Home/GetNextProfiles",
-                  data: { sessionGuid: sessionGuid },
+                  data: {
+                        sessionGuid: sessionGuid,
+                        query: query
+                  },
                   success: function (htmlResult) {
                     if (!htmlResult || htmlResult.length == 0) {
+                      noMoreProfiles = true;
+                      isLoading = false;
                       console.log("No more profiles.");
                       return;
                     }
 
                     $("#profilesContainer").append(htmlResult);
+                    isLoading = false;
                   },
                   error: function (xhr, status, error) {
                     console.error("Error fetching next profiles:", error);
                   }
+                });
+            }
+
+            $("#searchInput").on("input", function() {
+                var query = $(this).val();
+                
+                searchProfiles(query);
+            });
+
+            function searchProfiles(query) {
+                $.ajax({
+                    url: "/Home/SearchProfiles",
+                    type: "GET",
+                    data: {
+                        sessionGuid: sessionGuid,
+                        query: query
+                    },
+                    success: function(htmlResult) {                   
+                        $("#profilesContainer").html(htmlResult);
+                        noMoreProfiles = false;
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error searching profiles:", error);
+                    }
                 });
             }
 
