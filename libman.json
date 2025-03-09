@@ -13,6 +13,10 @@
     {
       "library": "microsoft-signalr@8.0.7",
       "destination": "wwwroot/microsoft-signalr/"
+    },
+    {
+      "library": "font-awesome@6.7.2",
+      "destination": "wwwroot/font-awesome/"
     }
   ]
 }

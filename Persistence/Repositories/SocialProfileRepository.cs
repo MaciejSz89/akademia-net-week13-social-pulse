@@ -13,11 +13,34 @@ namespace SocialPulse.Persistence.Repositories
             _context = serviceProvider.GetRequiredService<SocialPulseContext>();
         }
 
-        public async Task<IEnumerable<SocialProfile>> GetAsync()
+        public async Task<IEnumerable<SocialProfile>> GetAsync(SocialProfileSearchParams param)
         {
-            return await _context.SocialProfiles
-                                 .Include(x=>x.SocialPulseUser)
-                                 .ToListAsync();
+            var profilesQuery = _context.SocialProfiles
+                                        .Include(x => x.SocialPulseUser)
+                                        .AsQueryable();
+
+            if (param.AlreadyReturnedIds != null && param.AlreadyReturnedIds.Any())
+            {
+                profilesQuery = profilesQuery.Where(p => !param.AlreadyReturnedIds.Contains(p.Id));
+            }
+
+            profilesQuery = profilesQuery.OrderBy(x => Guid.NewGuid());
+
+            if (param.Count != null)
+            {
+                profilesQuery = profilesQuery.Take((int)param.Count);
+            }    
+
+
+            if (!string.IsNullOrEmpty(param.Query))
+            {
+                profilesQuery = profilesQuery.Where(x => x.SocialPulseUser
+                                                          .UserName!
+                                                          .ToLower()
+                                                          .Contains(param.Query.ToLower()));
+            }
+
+            return await profilesQuery.ToListAsync();
         }
 
         public async Task<SocialProfile?> GetAsync(int id)
