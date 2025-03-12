@@ -14,6 +14,7 @@ namespace SocialPulse.Core.Models.Repositories
         Task<IEnumerable<SocialProfile>> GetAsync(SocialProfileSearchParams param);
         Task<SocialProfile?> GetAsync(int id);
         Task<SocialProfile> GetByUserIdAsync(string userId);
+        Task RemoveByUserIdAsync(string userId);
         Task UpdateAsync(SocialProfile socialProfile);
     }
 }

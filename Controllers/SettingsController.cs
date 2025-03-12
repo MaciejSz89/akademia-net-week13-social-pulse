@@ -262,7 +262,27 @@ public class SettingsController : Controller
         }
     }
 
+    [HttpPost]
+    public async Task<IActionResult> RemoveProfile()
+    {
+        try
+        {
+            await _socialProfileService.RemoveSocialProfileAsync();
 
+            return Json(new ResponseDto
+            {
+                IsSuccess = true
+            });
+        }
+        catch
+        {
+            return Json(new ResponseDto
+            {
+                IsSuccess = false,
+                Message = "Coś poszło nie tak."
+            });
+        }
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]

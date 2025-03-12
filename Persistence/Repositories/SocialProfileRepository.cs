@@ -105,5 +105,18 @@ namespace SocialPulse.Persistence.Repositories
                                  .Include(x => x.SocialPulseUser)
                                  .SingleAsync(x => x.SocialPulseUserId == userId);
         }
+
+        public async Task RemoveByUserIdAsync(string userId)
+        {
+            var socialProfileToRemove = await GetByUserIdAsync(userId);
+            var userToRemove = socialProfileToRemove.SocialPulseUser;
+            var userLinksToRemove = socialProfileToRemove.UserLinks.ToList();
+            var socialLinksToRemove = socialProfileToRemove.SocialLinks.ToList();
+
+            userLinksToRemove.ForEach(x => _context.UserLinks.Remove(x));
+            socialLinksToRemove.ForEach(x => _context.SocialLinks.Remove(x));
+            _context.SocialProfiles.Remove(socialProfileToRemove);     
+            _context.Users.Remove(userToRemove);
+        }
     }
 }
