@@ -18,7 +18,7 @@
 
                     <div class="mb-3">
                         <div class="text-center">
-                            <img id="ProfileImagePreview" 
+                            <img id="ProfileImagePreview"
                                  src="@Model.ProfileImageBase64"
                                  alt="Profile Image"
                                  class="rounded-circle img-thumbnail mb-3"
@@ -97,9 +97,14 @@
                     </table>
 
                     <div class="d-flex justify-content-end mt-3">
-                        <button type="submit" 
-                            class="btn btn-primary">
+                        <button type="submit"
+                                class="btn btn-primary">
                             Zapisz
+                        </button>
+                        <button type="button"
+                                class="btn btn-danger ms-3"
+                                onclick="deleteProfile()">
+                            Usuń profil
                         </button>
                     </div>
                 </form>
@@ -134,8 +139,8 @@
 
         $("#profileForm").submit(function (event) {
             event.preventDefault();
-            
-            if (!$(this).valid()) {            
+
+            if (!$(this).valid()) {
                 return;
             }
 
@@ -146,7 +151,7 @@
                 url: $(this).attr("action"),
                 type: $(this).attr("method"),
                 data: formData,
-                contentType: false, 
+                contentType: false,
                 processData: false,
                 success: function (result) {
                     if (result.isSuccess) {
@@ -165,6 +170,30 @@
                 }
             });
         });
+
+        function deleteProfile(){
+            if(!confirm("Czy na pewno chcesz usunąć profil?")){
+                return;
+            }
+
+            $.ajax({
+                url: '/Settings/RemoveProfile/',
+                type: 'POST',
+                success: function (result) {
+                    if(result.isSuccess){
+                        alert("Profil usunięty");
+
+                        window.location.href = '/Home/Index/';
+                    }else{
+                        alert("Coś poszło nie tak.")
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Niespodziewany błąd: " + error);
+                }
+            });
+        }
+
     </script>
 
 }

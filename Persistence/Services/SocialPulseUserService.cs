@@ -1,18 +1,23 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using SocialPulse.Areas.Identity.Data;
 using SocialPulse.Core.Models.Services;
 using System.Security.Claims;
-
 
 namespace SocialPulse.Persistence.Services
 {
     public class SocialPulseUserService : ISocialPulseUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly SignInManager<SocialPulseUser> _signInManager;
+
         private ClaimsPrincipal? CurrentUser => _httpContextAccessor.HttpContext?.User;
-        public SocialPulseUserService(IHttpContextAccessor httpContextAccessor)
+
+
+        public SocialPulseUserService(IHttpContextAccessor httpContextAccessor, SignInManager<SocialPulseUser> signInManager)
         {
             _httpContextAccessor = httpContextAccessor;
+            _signInManager = signInManager;
         }
 
 
@@ -56,5 +61,9 @@ namespace SocialPulse.Persistence.Services
             };
         }
 
+        public async Task SignOutAsync()
+        {
+            await _signInManager.SignOutAsync();
+        }
     }
 }

@@ -8,5 +8,6 @@ namespace SocialPulse.Core.Models.Services
         string GetCurrentUserId();
         string GetCurrentUserName();
         string GetCurrentUserEmail();
+        Task SignOutAsync();
     }
 }

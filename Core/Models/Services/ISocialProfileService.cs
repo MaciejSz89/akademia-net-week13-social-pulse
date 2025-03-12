@@ -11,5 +11,6 @@ namespace SocialPulse.Core.Models.Services
         Task<SocialProfile> GetSocialProfileAsync(int id);
         Task<IEnumerable<SocialProfile>> GetInitSocialProfilesAsync(string sessionGuid, int count, string query);
         Task UpdateSocialProfileAsync(SocialProfile socialProfile, string? newUserName, string? newEmail);
+        Task RemoveSocialProfileAsync();
     }
 }

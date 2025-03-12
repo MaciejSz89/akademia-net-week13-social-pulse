@@ -126,5 +126,19 @@ namespace SocialPulse.Persistence.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
+        public async Task RemoveSocialProfileAsync()
+        {
+            var userId = _socialPulseUserService.GetCurrentUserId();
+
+            if (userId == null)
+            {
+                throw new NullReferenceException("User not found");
+            }
+
+            await _unitOfWork.SocialProfileRepository.RemoveByUserIdAsync(userId);
+            await _unitOfWork.SaveChangesAsync();
+
+            await _socialPulseUserService.SignOutAsync();
+        }
     }
 }
