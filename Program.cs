@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using SocialPulse;
 using SocialPulse.Areas.Identity.Data;
 using SocialPulse.Areas.Identity.Services;
 using SocialPulse.Core;
@@ -13,15 +14,13 @@ using SocialPulse.Hubs;
 using SocialPulse.Persistence;
 using SocialPulse.Persistence.Repositories;
 using SocialPulse.Persistence.Services;
+using System.Configuration;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("SocialPulseContextConnection") ?? throw new InvalidOperationException("Connection string 'SocialPulseContextConnection' not found.");
 
 builder.Services.AddDbContext<SocialPulseContext>(options => options.UseSqlServer(connectionString));
 var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
-bool isEmailConfigured = !string.IsNullOrWhiteSpace(emailSettings?.SmtpServer) &&
-                         emailSettings.SmtpPort > 0 &&
-                         !string.IsNullOrWhiteSpace(emailSettings?.FromEmail) &&
-                         !string.IsNullOrWhiteSpace(emailSettings?.FromPassword);
+bool isEmailConfigured = emailSettings?.IsEmailConfigured ?? false;
 
 builder.Services.AddDefaultIdentity<SocialPulseUser>(options =>
                                                     {
@@ -51,6 +50,8 @@ builder.Services.AddScoped<ISocialNetworkRepository, SocialNetworkRepository>()
                 .AddHostedService<CacheCleanupService>();
 
 builder.Services.AddSignalR();
+
+
 
 // Register the email sender if email settings are configured
 if (isEmailConfigured)
