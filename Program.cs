@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SocialPulse.Areas.Identity.Data;
+using SocialPulse.Areas.Identity.Services;
 using SocialPulse.Core;
 using SocialPulse.Core.Models.Domains.Settings;
 using SocialPulse.Core.Models.Repositories;
@@ -26,6 +28,7 @@ builder.Services.AddDefaultIdentity<SocialPulseUser>(options =>
                                                         options.SignIn.RequireConfirmedAccount = isEmailConfigured; // Require confirmation only if email is configured
                                                         options.User.RequireUniqueEmail = true;        // Ensure unique email addresses
                                                     })
+                .AddErrorDescriber<CustomIdentityErrorDescriber>()
                 .AddEntityFrameworkStores<SocialPulseContext>();
 
 // Add services to the container.
