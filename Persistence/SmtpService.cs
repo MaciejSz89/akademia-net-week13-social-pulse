@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace SocialPulse.Persistence
 {
-    public class SmtpEmailSender : IEmailSender
+    public class SmtpService : IEmailSender
     {
         private readonly string _smtpServer;
         private readonly int _smtpPort;
         private readonly string _fromEmail;
         private readonly string _fromPassword;
 
-        public SmtpEmailSender(string smtpServer, int smtpPort, string fromEmail, string fromPassword)
+        public SmtpService(string smtpServer, int smtpPort, string fromEmail, string fromPassword)
         {
             _smtpServer = smtpServer;
             _smtpPort = smtpPort;
