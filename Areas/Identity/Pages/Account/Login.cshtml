@@ -41,9 +41,12 @@
                     <p>
                         <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Zarejestruj nowego użytkownika</a>
                     </p>
-                    @*                     <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Wyślij maila potwierdzającego</a>
-                    </p> *@
+                    @if (Model.SmtpConfigured)
+                    {
+                        <p>
+                            <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Wyślij ponownie emaila potwierdzającego</a>
+                        </p>
+                    }
                 </div>
             </form>
         </section>
