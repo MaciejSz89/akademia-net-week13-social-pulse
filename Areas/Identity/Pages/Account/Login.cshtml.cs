@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using SocialPulse.Areas.Identity.Data;
+using SocialPulse.Persistence;
 
 namespace SocialPulse.Areas.Identity.Pages.Account;
 
@@ -23,13 +24,20 @@ public class LoginModel : PageModel
     private readonly SignInManager<SocialPulseUser> _signInManager;
     private readonly ILogger<LoginModel> _logger;
     private readonly UserManager<SocialPulseUser> _userManager;
+    private readonly IEmailSender _smptService;
 
-    public LoginModel(SignInManager<SocialPulseUser> signInManager, ILogger<LoginModel> logger, UserManager<SocialPulseUser> userManager)
+    public LoginModel(SignInManager<SocialPulseUser> signInManager, 
+                      ILogger<LoginModel> logger, 
+                      UserManager<SocialPulseUser> userManager,
+                      IEmailSender smtpService)
     {
         _signInManager = signInManager;
         _logger = logger;
         _userManager = userManager;
+        _smptService = smtpService;
     }
+
+    public bool SmtpConfigured => _smptService is SmtpService;
 
     /// <summary>
     ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -86,6 +94,7 @@ public class LoginModel : PageModel
         /// </summary>
         [Display(Name = "Zapamiętaj mnie")]
         public bool RememberMe { get; set; }
+    
     }
 
     public async Task OnGetAsync(string returnUrl = null)

@@ -16,6 +16,10 @@ using SocialPulse.Persistence.Repositories;
 using SocialPulse.Persistence.Services;
 using System.Configuration;
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration
+       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+       .AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
+
 var connectionString = builder.Configuration.GetConnectionString("SocialPulseContextConnection") ?? throw new InvalidOperationException("Connection string 'SocialPulseContextConnection' not found.");
 
 builder.Services.AddDbContext<SocialPulseContext>(options => options.UseSqlServer(connectionString));
@@ -57,7 +61,7 @@ builder.Services.AddSignalR();
 if (isEmailConfigured)
 {
     builder.Services.AddTransient<IEmailSender>(provider =>
-        new SmtpEmailSender(
+        new SmtpService(
             emailSettings!.SmtpServer,
             emailSettings.SmtpPort,
             emailSettings.FromEmail,
